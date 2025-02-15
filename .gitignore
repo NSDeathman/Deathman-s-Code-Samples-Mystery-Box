@@ -1,32 +1,16 @@
-# Prerequisites
-*.d
+*.db
+*.pdb
+*.db-shm
+*.db-wal
+*.opendb
+*.ipch
+*.PVS-Studio
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+intermediate/*
+libraries/*
+appdata/*
+bin/*
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+.vs/*
+build/*
+*.rar
