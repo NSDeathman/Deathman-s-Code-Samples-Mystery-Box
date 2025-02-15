@@ -40,6 +40,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_DESTROY:
         PostQuitMessage(NULL); // Post a quit message when the window is destroyed
         return NULL;
+    case WM_PAINT:
+        return NULL;
     }
 
     // Call default handler for other messages
@@ -49,6 +51,25 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 // Entry point of the application
 INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT) 
 {
+    //-------------------EXTERNAL CONSOLE LOG WINDOW CREATING CODE-------------------//
+    if (AllocConsole())
+    {
+        // Use _CRT_SECURE_NO_WARNINGS define in VS project settings
+        (void)freopen("CONIN$", "r", stdin);
+        (void)freopen("CONOUT$", "w", stderr);
+        (void)freopen("CONOUT$", "w", stdout);
+
+        SetConsoleCP(1251);
+        SetConsoleOutputCP(1251);
+    }
+
+    _set_error_mode(_OUT_TO_STDERR);
+
+    std::cout << "Console log window created successfully \n";
+    std::cout << "\n";
+
+    std::cout << "Starting application\n";
+
     //-------------------WINDOW CREATING CODE-------------------//
     // Register the window class 
     // (For correct work turn off worldwide and unicode symbols using 
@@ -63,6 +84,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     WindClass.hCursor = LoadCursor(NULL, IDC_ARROW);   // Default cursor
 
     // Register the window class
+    std::cout << "Window class registering \n";
     RegisterClass(&WindClass);
 
     // Create the window
@@ -81,8 +103,11 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     if (g_Window == NULL)
     {
         // If the window creation failed, exit
+        std::cout << "Error in window creating procedure \n";
         return NULL;
     }
+
+    std::cout << "Window created successfully \n";
 
     // Show the window 
     // (You need turn subsystem to Windows (/SUBSYSTEM:WINDOWS) 
@@ -91,6 +116,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
     //-------------------DIRECT3D CREATING CODE-------------------//
     // Initialize Direct3D
+    std::cout << "Creating Direct3D 9 \n";
     g_Direct3D = Direct3DCreate9(D3D_SDK_VERSION);
 
     D3DPRESENT_PARAMETERS Direct3DPresentationParams;
@@ -105,6 +131,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     HRESULT result = E_FAIL;
 
     // Create the device
+    std::cout << "Creating Direct3D 9 Device \n";
     result = g_Direct3D->CreateDevice(
         D3DADAPTER_DEFAULT,
         D3DDEVTYPE_HAL,
@@ -117,10 +144,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     if (FAILED(result))
     {
         // Handle device creation failure (add your error handling here)
+        std::cout << "Error in Direct3D 9 Device creating procedure \n";
         return NULL;
     }
 
     //-------------------EVENT LOOP PROCESSING CODE-------------------//
+    std::cout << "\n";
+    std::cout << "Starting event loop \n";
+
     MSG WindowMessage;
     while (true)
     {
@@ -136,6 +167,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // Device lost event handling
         if (g_bDeviceLost)
         {
+            std::cout << "Device was been lost - handle \n";
+
             result = g_Direct3DDevice->TestCooperativeLevel();
 
             if (result == D3DERR_DEVICELOST)
@@ -150,10 +183,15 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // Device reseting code
         if (g_bNeedReset)
         {
+            std::cout << "Resetting Direct3D Device \n";
+
             result = g_Direct3DDevice->Reset(&Direct3DPresentationParams);
                 
             if (result == D3DERR_INVALIDCALL)
-                break;//ERROR_MESSAGE("Invalid call while device resetting");
+            {
+                std::cout << "Invalid call while device resetting \n";
+                break;
+            }
 
             g_bNeedReset = false;
         }
@@ -196,17 +234,27 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     }
 
     //-------------------DESTROYING CODE-------------------//
+    std::cout << "\n";
+    std::cout << "Ending event loop \n";
+    std::cout << "\n";
+
     if (g_Direct3DDevice) 
     {
+        std::cout << "Releasing Direct3D Device \n";
         g_Direct3DDevice->Release();
         g_Direct3DDevice = nullptr;
     }
 
     if (g_Direct3D) 
     {
+        std::cout << "Releasing Direct3D \n";
         g_Direct3D->Release();
         g_Direct3D = nullptr;
     }
+
+    std::cout << "\n";
+    std::cout << "Application closed successfully, closing window after 3 seconds \n";
+    Sleep(3000);
 
     // Return the message parameter
     return (INT)WindowMessage.wParam;
