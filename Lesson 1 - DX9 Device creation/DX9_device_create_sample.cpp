@@ -211,6 +211,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         g_Direct3D = nullptr;
     }
 
+    ShowWindow(g_Window, SW_HIDE);
+
     std::cout << "\n";
     std::cout << "Application closed successfully, closing window after 3 seconds \n";
     Sleep(3000);
