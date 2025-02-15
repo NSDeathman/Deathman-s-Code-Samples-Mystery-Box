@@ -28,6 +28,9 @@
 IDirect3D9* g_Direct3D = nullptr;
 IDirect3DDevice9* g_Direct3DDevice = nullptr;
 HWND g_Window = nullptr;
+
+bool g_bDeviceLost = false;
+bool g_bNeedReset = false;
 ///////////////////////////////////////////////////////////////
 // Window procedure function definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
@@ -130,6 +133,31 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         if (WindowMessage.message == WM_QUIT)
             break;
 
+        // Device lost event handling
+        if (g_bDeviceLost)
+        {
+            result = g_Direct3DDevice->TestCooperativeLevel();
+
+            if (result == D3DERR_DEVICELOST)
+                Sleep(10);
+
+            if (result == D3DERR_DEVICENOTRESET)
+                g_bNeedReset = true;
+
+            g_bDeviceLost = false;
+        }
+
+        // Device reseting code
+        if (g_bNeedReset)
+        {
+            result = g_Direct3DDevice->Reset(&Direct3DPresentationParams);
+                
+            if (result == D3DERR_INVALIDCALL)
+                break;//ERROR_MESSAGE("Invalid call while device resetting");
+
+            g_bNeedReset = false;
+        }
+
         // Clear the back buffer
         // Generating new color every frame with a time
         D3DXVECTOR4 ClearColor = { NULL, NULL, NULL, NULL };
@@ -160,7 +188,11 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         g_Direct3DDevice->EndScene();
 
         // Present frame to screen
-        g_Direct3DDevice->Present(NULL, NULL, NULL, NULL);
+        result = g_Direct3DDevice->Present(NULL, NULL, NULL, NULL);
+
+        // Set device lost event flag true if Present execution result return it
+        if (result == D3DERR_DEVICELOST)
+            g_bDeviceLost = true;
     }
 
     //-------------------DESTROYING CODE-------------------//
