@@ -3,7 +3,7 @@
 // Author: NS_Deathman
 // Deathman's samples mystery box
 ///////////////////////////////////////////////////////////////
-// Lesson ¹3 - "DirectX 9 triangle rendering"
+// Lesson ¹4 - "DirectX 9 transform matrices"
 ///////////////////////////////////////////////////////////////
 // Windows includes (You need to add $(WindowsSDK_IncludePath)
 // to VS include paths of your project)
@@ -259,6 +259,39 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
             g_bNeedReset = false;
         }
 
+        // For our world matrix, we will just rotate the object about the y-axis.
+        D3DXMATRIX matWorld;
+
+        // Set up the rotation matrix to generate 1 full rotation (2*PI radians) 
+        // every 1000 ms. To avoid the loss of precision inherent in very high 
+        // floating point numbers, the system time is modulated by the rotation 
+        // period before conversion to a radian angle.
+        UINT iTime = timeGetTime() % 1000;
+        FLOAT fAngle = iTime * (2.0f * D3DX_PI) / 1000.0f;
+        D3DXMatrixRotationY(&matWorld, fAngle);
+        g_Direct3DDevice->SetTransform(D3DTS_WORLD, &matWorld);
+
+        // Set up our view matrix. A view matrix can be defined given an eye point,
+        // a point to lookat, and a direction for which way is up. Here, we set the
+        // eye five units back along the z-axis and up three units, look at the
+        // origin, and define "up" to be in the y-direction.
+        D3DXVECTOR3 vEyePt(0.0f, 3.0f, -5.0f);
+        D3DXVECTOR3 vLookatPt(0.0f, 0.0f, 0.0f);
+        D3DXVECTOR3 vUpVec(0.0f, 1.0f, 0.0f);
+        D3DXMATRIX matView;
+        D3DXMatrixLookAtLH(&matView, &vEyePt, &vLookatPt, &vUpVec);
+        g_Direct3DDevice->SetTransform(D3DTS_VIEW, &matView);
+
+        // For the projection matrix, we set up a perspective transform (which
+        // transforms geometry from 3D view space to 2D viewport space, with
+        // a perspective divide making objects smaller in the distance). To build
+        // a perpsective transform, we need the field of view (1/4 pi is common),
+        // the aspect ratio, and the near and far clipping planes (which define at
+        // what distances geometry should be no longer be rendered).
+        D3DXMATRIX matProjection;
+        D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4, 1.0f, 1.0f, 100.0f);
+        g_Direct3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
+
         // Clear the back buffer
         g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(255, 255, 255), 1.0f, NULL);
 
@@ -273,6 +306,9 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
         // Draw the triangle
         g_Direct3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, TrianglesCount);
+
+        // Disable backface culling
+        g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
         // Disable FFP lighting
         g_Direct3DDevice->SetRenderState(D3DRS_LIGHTING, false);
