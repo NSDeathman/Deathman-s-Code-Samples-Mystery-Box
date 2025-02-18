@@ -148,12 +148,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Starting event loop \n";
 
     MSG WindowMessage;
-    while (true)
+    ZeroMemory(&WindowMessage, sizeof(WindowMessage));
+    while (WindowMessage.message != WM_QUIT)
     {
-        // Process window messages
-        PeekMessage(&WindowMessage, NULL, NULL, NULL, PM_REMOVE);
-        TranslateMessage(&WindowMessage);
-        DispatchMessage(&WindowMessage);
+        if (PeekMessage(&WindowMessage, NULL, 0U, 0U, PM_REMOVE))
+        {
+            TranslateMessage(&WindowMessage);
+            DispatchMessage(&WindowMessage);
+        }
 
         // Break out of the loop if the window is closed
         if (WindowMessage.message == WM_QUIT)

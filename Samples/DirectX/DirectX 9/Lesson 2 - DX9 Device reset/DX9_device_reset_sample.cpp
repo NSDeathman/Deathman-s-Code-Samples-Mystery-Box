@@ -31,6 +31,9 @@ HWND g_Window = nullptr;
 
 bool g_bDeviceLost = false;
 bool g_bNeedReset = false;
+
+int g_ResizeHeight = 0;
+int g_ResizeWidth = 0;
 ///////////////////////////////////////////////////////////////
 // Window procedure function definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
@@ -40,8 +43,12 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_DESTROY:
         PostQuitMessage(NULL); // Post a quit message when the window is destroyed
         return NULL;
-    case WM_PAINT:
-        return NULL;
+    case WM_SIZE:
+        if (wParam == SIZE_MINIMIZED)
+            return 0;
+        g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
+        g_ResizeHeight = (UINT)HIWORD(lParam);
+        return 0;
     }
 
     // Call default handler for other messages
@@ -153,16 +160,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Starting event loop \n";
 
     MSG WindowMessage;
-    while (true)
+    ZeroMemory(&WindowMessage, sizeof(WindowMessage));
+    while (WindowMessage.message != WM_QUIT)
     {
-        // Process window messages
-        PeekMessage(&WindowMessage, NULL, NULL, NULL, PM_REMOVE);
-        TranslateMessage(&WindowMessage);
-        DispatchMessage(&WindowMessage);
-
-        // Break out of the loop if the window is closed
-        if (WindowMessage.message == WM_QUIT)
-            break;
+        if (PeekMessage(&WindowMessage, NULL, 0U, 0U, PM_REMOVE))
+        {
+            TranslateMessage(&WindowMessage);
+            DispatchMessage(&WindowMessage);
+        }
 
         // Device lost event handling
         if (g_bDeviceLost)
@@ -194,6 +199,15 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
             }
 
             g_bNeedReset = false;
+        }
+
+        // Handle window resize (we don't resize directly in the WM_SIZE handler)
+        if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
+        {
+            Direct3DPresentationParams.BackBufferWidth = g_ResizeWidth;
+            Direct3DPresentationParams.BackBufferHeight = g_ResizeHeight;
+            g_ResizeWidth = g_ResizeHeight = 0;
+            g_bNeedReset = true;
         }
 
         // Clear the back buffer

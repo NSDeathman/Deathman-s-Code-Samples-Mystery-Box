@@ -32,6 +32,14 @@ HWND g_Window = nullptr;
 bool g_bDeviceLost = false;
 bool g_bNeedReset = false;
 
+int g_ScreenHeight = 800;
+int g_ScreenWidth = 600;
+
+int g_ResizeHeight = 0;
+int g_ResizeWidth = 0;
+
+float g_ScreenResolutionAspectRatio = (float)g_ScreenWidth / (float)g_ScreenHeight;
+///////////////////////////////////////////////////////////////
 // Vertex buffer
 LPDIRECT3DVERTEXBUFFER9 g_VertexBuffer = nullptr;
 
@@ -54,8 +62,12 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_DESTROY:
         PostQuitMessage(NULL); // Post a quit message when the window is destroyed
         return NULL;
-    case WM_PAINT:
-        return NULL;
+    case WM_SIZE:
+        if (wParam == SIZE_MINIMIZED)
+            return 0;
+        g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
+        g_ResizeHeight = (UINT)HIWORD(lParam);
+        return 0;
     }
 
     // Call default handler for other messages
@@ -107,10 +119,13 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         window_class_name,          // Window class
         window_name,                // Window text
         WS_OVERLAPPEDWINDOW,        // Window style
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, // Size and position
+        CW_USEDEFAULT,              // Position X
+        CW_USEDEFAULT,              // Position Y
+        g_ScreenHeight,             // Size X
+        g_ScreenWidth,              // Size Y
         NULL,                       // Parent window
         NULL,                       // Menu
-        hInstance,                  // Instance handle
+        WindClass.hInstance,        // Instance handle
         NULL                        // Additional application data
     );
 
@@ -126,7 +141,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     // Show the window 
     // (You need turn subsystem to Windows (/SUBSYSTEM:WINDOWS) 
     // in VS project settings for this)
-    ShowWindow(g_Window, SW_SHOW);
+    ShowWindow(g_Window, SW_SHOWDEFAULT);
+    UpdateWindow(g_Window);
 
     //-------------------DIRECT3D CREATING CODE-------------------//
     // Initialize Direct3D
@@ -177,7 +193,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         VertexBufferSize,           // Size of the vertex buffer
         NULL,                       // Usage
         VERTEXFVF,                  // FVF
-        D3DPOOL_DEFAULT,            // Memory pool
+        D3DPOOL_MANAGED,            // Memory pool
         &g_VertexBuffer,            // Pointer to the vertex buffer
         NULL                        // Handle to the resource
     );
@@ -216,16 +232,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Starting event loop \n";
 
     MSG WindowMessage;
-    while (true)
+    ZeroMemory(&WindowMessage, sizeof(WindowMessage));
+    while (WindowMessage.message != WM_QUIT)
     {
-        // Process window messages
-        PeekMessage(&WindowMessage, NULL, NULL, NULL, PM_REMOVE);
-        TranslateMessage(&WindowMessage);
-        DispatchMessage(&WindowMessage);
-
-        // Break out of the loop if the window is closed
-        if (WindowMessage.message == WM_QUIT)
-            break;
+        if (PeekMessage(&WindowMessage, NULL, 0U, 0U, PM_REMOVE))
+        {
+            TranslateMessage(&WindowMessage);
+            DispatchMessage(&WindowMessage);
+        }
 
         // Device lost event handling
         if (g_bDeviceLost)
@@ -249,7 +263,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
             std::cout << "Resetting Direct3D Device \n";
 
             result = g_Direct3DDevice->Reset(&Direct3DPresentationParams);
-                
+
             if (result == D3DERR_INVALIDCALL)
             {
                 std::cout << "Invalid call while device resetting \n";
@@ -257,6 +271,18 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
             }
 
             g_bNeedReset = false;
+        }
+
+        // Handle window resize (we don't resize directly in the WM_SIZE handler)
+        if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
+        {
+            Direct3DPresentationParams.BackBufferWidth = g_ScreenWidth = g_ResizeWidth;
+            Direct3DPresentationParams.BackBufferHeight = g_ScreenHeight = g_ResizeHeight;
+
+            g_ScreenResolutionAspectRatio = (float)g_ScreenWidth / (float)g_ScreenHeight;
+
+            g_ResizeWidth = g_ResizeHeight = 0;
+            g_bNeedReset = true;
         }
 
         // For our world matrix, we will just rotate the object about the y-axis.
@@ -289,7 +315,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // the aspect ratio, and the near and far clipping planes (which define at
         // what distances geometry should be no longer be rendered).
         D3DXMATRIX matProjection;
-        D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4, 1.0f, 1.0f, 100.0f);
+        D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4, g_ScreenResolutionAspectRatio, 1.0f, 100.0f);
         g_Direct3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
         // Clear the back buffer
