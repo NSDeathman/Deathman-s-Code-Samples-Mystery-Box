@@ -163,10 +163,10 @@ D3DXVECTOR3 CubeSidesNormals[6] =
 
 D3DXVECTOR2 CubeSideUV[4] =
 {
-    D3DXVECTOR2(0.0f, 0.0f),
-    D3DXVECTOR2(0.0f, 1.0f),
     D3DXVECTOR2(1.0f, 1.0f),
     D3DXVECTOR2(1.0f, 0.0f),
+    D3DXVECTOR2(0.0f, 0.0f),
+    D3DXVECTOR2(0.0f, 1.0f),
 };
 ///////////////////////////////////////////////////////////////
 // Entry point of the application
