@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDL Samples", "SDL Samples"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL Simply Example", "Samples\SDL\SDL Simply Example\SDL Simply Example.vcxproj", "{4C4729E4-F194-4E8E-A638-7796EC4C76D6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Combining SDL with DirectX9", "Samples\SDL\Combining SDL with DirectX9\Combining SDL with DirectX9.vcxproj", "{FF507BB6-1F99-4B20-B281-6437F57CD6D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -89,6 +91,14 @@ Global
 		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x64.Build.0 = Release|x64
 		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x86.ActiveCfg = Release|Win32
 		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x86.Build.0 = Release|Win32
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Debug|x64.ActiveCfg = Debug|x64
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Debug|x64.Build.0 = Debug|x64
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Debug|x86.ActiveCfg = Debug|Win32
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Debug|x86.Build.0 = Debug|Win32
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Release|x64.ActiveCfg = Release|x64
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Release|x64.Build.0 = Release|x64
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Release|x86.ActiveCfg = Release|Win32
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +113,7 @@ Global
 		{0C912E73-47C7-47B3-9C7F-BFC52218EEDC} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
 		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
 		{4C4729E4-F194-4E8E-A638-7796EC4C76D6} = {7D6C7252-0E56-4EA2-89EE-28C90D10AC91}
+		{FF507BB6-1F99-4B20-B281-6437F57CD6D2} = {7D6C7252-0E56-4EA2-89EE-28C90D10AC91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A4B16603-B6CA-4EDD-BB60-F28DE6BD46CB}

@@ -3,7 +3,7 @@
 // Author: NS_Deathman
 // Deathman's samples mystery box
 ///////////////////////////////////////////////////////////////
-// SDL Simply window creating sample
+// SDL with DirectX9 combining sample
 ///////////////////////////////////////////////////////////////
 // Windows includes (You need to add $(WindowsSDK_IncludePath)
 // to VS include paths of your project)
@@ -12,11 +12,22 @@
 #include <windows.h>
 ///////////////////////////////////////////////////////////////
 // Windows libraries
-#pragma comment( lib, "winmm.lib")   
+#pragma comment( lib, "winmm.lib")
+///////////////////////////////////////////////////////////////
+// Includes (You need to add $(DXSDK_DIR)Include\ to VS 
+// include paths of your project) 
+#include <d3dx9.h>
+///////////////////////////////////////////////////////////////
+// Libraries (You need to add 
+// $(DXSDK_DIR)Lib\$(LibrariesArchitecture)\ to VS include 
+// paths of your project) 
+#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "d3dx9.lib")
 ///////////////////////////////////////////////////////////////
 // SDL Includes (You need to add $(SolutionDir)\Third-Party\Include\
 // to VS include paths of your project) 
 #include <SDL/SDL.h>
+#include <SDL/SDL_syswm.h>
 ///////////////////////////////////////////////////////////////
 // SDL Libraries (You need to add 
 // $(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\
@@ -28,7 +39,10 @@
 ///////////////////////////////////////////////////////////////
 // Global variables
 SDL_Window* g_Window = nullptr;
-SDL_Renderer* g_Renderer = nullptr;
+SDL_SysWMinfo g_WindowInfo;
+HWND g_DefaultWindow = nullptr;
+IDirect3D9* g_Direct3D = nullptr;
+IDirect3DDevice9* g_Direct3DDevice = nullptr;
 ///////////////////////////////////////////////////////////////
 // Window procedure function definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
@@ -67,14 +81,12 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Starting application\n";
 
     //-------------------SDL INITIALIZING CODE-------------------//
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
-    {
-        std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << "\n";
-        return -1;
-    }
+    std::cout << "\n";
+    std::cout << "Initializing SDL \n";
 
     // Create an SDL window
-    g_Window = SDL_CreateWindow("SDL2 Sample", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+    std::cout << "Initializing SDL Window \n";
+    g_Window = SDL_CreateWindow("SDL2 with DX9 Sample", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
     if (g_Window == nullptr) 
     {
         std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << "\n";
@@ -82,14 +94,50 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         return -1;
     }
 
-    // Create a rendering context
-    g_Renderer = SDL_CreateRenderer(g_Window, -1, SDL_RENDERER_ACCELERATED);
-    if (g_Renderer == nullptr) 
+    // Get SDL version
+    SDL_VERSION(&g_WindowInfo.version);
+
+    // Result value for handle function execution result
+    HRESULT result = E_FAIL;
+
+    // Get window info for get hwnd window
+    result = SDL_GetWindowWMInfo(g_Window, &g_WindowInfo);
+
+    // Get default HWND window for DirectX
+    g_DefaultWindow = g_WindowInfo.info.win.window;
+
+    //-------------------DIRECT3D CREATING CODE-------------------//
+    // Initialize Direct3D
+    std::cout << "\n";
+    std::cout << "Creating Direct3D 9 \n";
+    g_Direct3D = Direct3DCreate9(D3D_SDK_VERSION);
+
+    D3DPRESENT_PARAMETERS Direct3DPresentationParams;
+    ZeroMemory(&Direct3DPresentationParams, sizeof(Direct3DPresentationParams));
+    Direct3DPresentationParams.Windowed = TRUE;
+    Direct3DPresentationParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    Direct3DPresentationParams.BackBufferFormat = D3DFMT_UNKNOWN;
+    Direct3DPresentationParams.EnableAutoDepthStencil = TRUE;
+    Direct3DPresentationParams.AutoDepthStencilFormat = D3DFMT_D24X8;
+
+    // Create the device
+    std::cout << "Creating Direct3D 9 Device \n";
+    result = g_Direct3D->CreateDevice(
+        D3DADAPTER_DEFAULT,
+        D3DDEVTYPE_HAL,
+        g_DefaultWindow,
+        D3DCREATE_HARDWARE_VERTEXPROCESSING,
+        &Direct3DPresentationParams,
+        &g_Direct3DDevice
+    );
+
+    if (FAILED(result))
     {
-        std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << "\n";
+        // Handle device creation failure (add your error handling here)
+        std::cout << "Error in Direct3D 9 Device creating procedure \n";
         SDL_DestroyWindow(g_Window);
         SDL_Quit();
-        return -1;
+        return NULL;
     }
 
     //-------------------EVENT LOOP CREATING CODE-------------------//
@@ -118,13 +166,19 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         uint8_t g = (uint8_t)((sin(Time * 0.0025f) + 1.0f) * 127.5f);
         uint8_t b = (uint8_t)((sin(Time * 0.0001f) + 1.0f) * 127.5f);
 
-        // Set the drawing color
-        SDL_SetRenderDrawColor(g_Renderer, r, g, b, 255); // RGBA
-        SDL_RenderClear(g_Renderer); // Clear the screen
+        // Clearing
+        g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB((int)r, (int)g, (int)b), 1.0f, NULL);
 
-        // Draw things here...
+        // Begin the scene
+        g_Direct3DDevice->BeginScene();
 
-        SDL_RenderPresent(g_Renderer); // Present the backbuffer
+        //Rendering code
+
+        // End the scene
+        g_Direct3DDevice->EndScene();
+
+        // Present frame to screen
+        g_Direct3DDevice->Present(NULL, NULL, NULL, NULL);
     }
 
     //-------------------APPLICATION DESTROYING CODE-------------------//
@@ -134,7 +188,20 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Ending event loop \n";
     std::cout << "Cleaning up resources...\n";
 
-    SDL_DestroyRenderer(g_Renderer);
+    if (g_Direct3DDevice)
+    {
+        std::cout << "Releasing Direct3D Device \n";
+        g_Direct3DDevice->Release();
+        g_Direct3DDevice = nullptr;
+    }
+
+    if (g_Direct3D)
+    {
+        std::cout << "Releasing Direct3D \n";
+        g_Direct3D->Release();
+        g_Direct3D = nullptr;
+    }
+
     SDL_DestroyWindow(g_Window);
     SDL_Quit();
 

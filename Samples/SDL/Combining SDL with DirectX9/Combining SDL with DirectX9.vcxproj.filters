@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="SDL_simply_example.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\..\Third-Party\Include\SDL\begin_code.h">
       <Filter>Third party\SDL2</Filter>
     </ClInclude>
@@ -285,5 +282,8 @@
     <Filter Include="Third party\SDL2">
       <UniqueIdentifier>{dabbd5df-c0f3-47d3-b3a6-f14be0c50859}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DX9_with_SDL_combining_sample.cpp" />
   </ItemGroup>
 </Project>
