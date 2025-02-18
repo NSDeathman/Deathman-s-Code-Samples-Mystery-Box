@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////
-// Date: 14.02.2025
+// Date: 15.02.2025
 // Author: NS_Deathman
 // Deathman's samples mystery box
 ///////////////////////////////////////////////////////////////
-// Lesson ¹1 - "DirectX 9 device and window creating"
+// Lesson ¹2 - "DirectX 9 device reseting"
 ///////////////////////////////////////////////////////////////
 // Windows includes (You need to add $(WindowsSDK_IncludePath)
 // to VS include paths of your project)
@@ -28,6 +28,9 @@
 IDirect3D9* g_Direct3D = nullptr;
 IDirect3DDevice9* g_Direct3DDevice = nullptr;
 HWND g_Window = nullptr;
+
+bool g_bDeviceLost = false;
+bool g_bNeedReset = false;
 ///////////////////////////////////////////////////////////////
 // Window procedure function definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
@@ -36,6 +39,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     {
     case WM_DESTROY:
         PostQuitMessage(NULL); // Post a quit message when the window is destroyed
+        return NULL;
+    case WM_PAINT:
         return NULL;
     }
 
@@ -159,26 +164,51 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         if (WindowMessage.message == WM_QUIT)
             break;
 
+        // Device lost event handling
+        if (g_bDeviceLost)
+        {
+            std::cout << "Device was been lost - handle \n";
+
+            result = g_Direct3DDevice->TestCooperativeLevel();
+
+            if (result == D3DERR_DEVICELOST)
+                Sleep(10);
+
+            if (result == D3DERR_DEVICENOTRESET)
+                g_bNeedReset = true;
+
+            g_bDeviceLost = false;
+        }
+
+        // Device reseting code
+        if (g_bNeedReset)
+        {
+            std::cout << "Resetting Direct3D Device \n";
+
+            result = g_Direct3DDevice->Reset(&Direct3DPresentationParams);
+                
+            if (result == D3DERR_INVALIDCALL)
+            {
+                std::cout << "Invalid call while device resetting \n";
+                break;
+            }
+
+            g_bNeedReset = false;
+        }
+
         // Clear the back buffer
         // Generating new color every frame with a time
-        D3DXVECTOR4 ClearColor = { NULL, NULL, NULL, NULL };
 
         // Get actual time
         DWORD Time = timeGetTime();
 
-        // Generating {0; 1} value of RGBA color with sin and cos
-        ClearColor.x = sinf(Time * 0.0005f);
-        ClearColor.y = sinf(Time * 0.0025f);
-        ClearColor.z = sinf(Time * 0.0001f);
-
-        // Set alpha to 1.0f (set untransparent color)
-        ClearColor.w = 1.0f;
-
-        // Transform {0; 1} color to {0; 255} value
-        ClearColor *= 255;
+        // Generating color values between 0-255 using sine functions
+        uint8_t r = (uint8_t)((sin(Time * 0.0005f) + 1.0f) * 127.5f);
+        uint8_t g = (uint8_t)((sin(Time * 0.0025f) + 1.0f) * 127.5f);
+        uint8_t b = (uint8_t)((sin(Time * 0.0001f) + 1.0f) * 127.5f);
 
         // Clearing
-        g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA((int)ClearColor.x, (int)ClearColor.y, (int)ClearColor.z, (int)ClearColor.w), 1.0f, NULL);
+        g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB((int)r, (int)g, (int)b), 1.0f, NULL);
 
         // Begin the scene
         g_Direct3DDevice->BeginScene();
@@ -189,7 +219,11 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         g_Direct3DDevice->EndScene();
 
         // Present frame to screen
-        g_Direct3DDevice->Present(NULL, NULL, NULL, NULL);
+        result = g_Direct3DDevice->Present(NULL, NULL, NULL, NULL);
+
+        // Set device lost event flag true if Present execution result return it
+        if (result == D3DERR_DEVICELOST)
+            g_bDeviceLost = true;
     }
 
     //-------------------DESTROYING CODE-------------------//
@@ -197,14 +231,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Ending event loop \n";
     std::cout << "\n";
 
-    if (g_Direct3DDevice)
+    if (g_Direct3DDevice) 
     {
         std::cout << "Releasing Direct3D Device \n";
         g_Direct3DDevice->Release();
         g_Direct3DDevice = nullptr;
     }
 
-    if (g_Direct3D)
+    if (g_Direct3D) 
     {
         std::cout << "Releasing Direct3D \n";
         g_Direct3D->Release();

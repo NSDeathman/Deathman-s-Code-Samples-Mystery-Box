@@ -3,23 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 5 - DX9 Textured cube", "DirectX\DirectX 9\Lesson 5 - DX9 Textured cube\Lesson 5 - DX9 Textured cube.vcxproj", "{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 1 - DX9 Device creation", "DirectX\DirectX 9\Lesson 1 - DX9 Device creation\Lesson 1 - DX9 Device creation.vcxproj", "{806B5E1F-A4EF-4A01-B3CB-B9ED9F4A5713}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 2 - DX9 Device reset", "DirectX\DirectX 9\Lesson 2 - DX9 Device reset\Lesson 2 - DX9 Device reset.vcxproj", "{3C6D74B5-5827-425E-8453-715838E07F01}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 3 - DX9 Triangle rendering", "DirectX\DirectX 9\Lesson 3 - DX9 Triangle rendering\Lesson 3 - DX9 Triangle rendering.vcxproj", "{42D1EBBA-937E-426A-B288-696F6B446B16}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 4 - DX9 Transform matrices", "DirectX\DirectX 9\Lesson 4 - DX9 Transform matrices\Lesson 4 - DX9 Transform matrices.vcxproj", "{0C912E73-47C7-47B3-9C7F-BFC52218EEDC}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 1 - DX11 Device creation", "DirectX\DirectX 11\Lesson 1 - DX11 Device creation\Lesson 1 - DX11 Device creation.vcxproj", "{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DirectX Samples", "DirectX Samples", "{D25DF5A5-16FD-4C06-A23D-651807BF95A5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DirectX 11", "DirectX 11", "{91FE55FD-7C00-4377-AF14-36743DD5521B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DirectX 9", "DirectX 9", "{5221D268-5367-4B31-B3D2-697ECAE80E12}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 1 - DX11 Device creation", "Samples\DirectX\DirectX 11\Lesson 1 - DX11 Device creation\Lesson 1 - DX11 Device creation.vcxproj", "{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 1 - DX9 Device creation", "Samples\DirectX\DirectX 9\Lesson 1 - DX9 Device creation\Lesson 1 - DX9 Device creation.vcxproj", "{806B5E1F-A4EF-4A01-B3CB-B9ED9F4A5713}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 2 - DX9 Device reset", "Samples\DirectX\DirectX 9\Lesson 2 - DX9 Device reset\Lesson 2 - DX9 Device reset.vcxproj", "{3C6D74B5-5827-425E-8453-715838E07F01}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 3 - DX9 Triangle rendering", "Samples\DirectX\DirectX 9\Lesson 3 - DX9 Triangle rendering\Lesson 3 - DX9 Triangle rendering.vcxproj", "{42D1EBBA-937E-426A-B288-696F6B446B16}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 4 - DX9 Transform matrices", "Samples\DirectX\DirectX 9\Lesson 4 - DX9 Transform matrices\Lesson 4 - DX9 Transform matrices.vcxproj", "{0C912E73-47C7-47B3-9C7F-BFC52218EEDC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 5 - DX9 Textured cube", "Samples\DirectX\DirectX 9\Lesson 5 - DX9 Textured cube\Lesson 5 - DX9 Textured cube.vcxproj", "{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDL Samples", "SDL Samples", "{7D6C7252-0E56-4EA2-89EE-28C90D10AC91}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL Simply Example", "Samples\SDL\SDL Simply Example\SDL Simply Example.vcxproj", "{4C4729E4-F194-4E8E-A638-7796EC4C76D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,14 +33,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x64.ActiveCfg = Debug|x64
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x64.Build.0 = Debug|x64
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x86.ActiveCfg = Debug|Win32
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x86.Build.0 = Debug|Win32
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x64.ActiveCfg = Release|x64
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x64.Build.0 = Release|x64
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x86.ActiveCfg = Release|Win32
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x86.Build.0 = Release|Win32
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x64.ActiveCfg = Debug|x64
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x64.Build.0 = Debug|x64
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x86.ActiveCfg = Debug|Win32
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x86.Build.0 = Debug|Win32
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x64.ActiveCfg = Release|x64
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x64.Build.0 = Release|x64
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x86.ActiveCfg = Release|Win32
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x86.Build.0 = Release|Win32
 		{806B5E1F-A4EF-4A01-B3CB-B9ED9F4A5713}.Debug|x64.ActiveCfg = Debug|x64
 		{806B5E1F-A4EF-4A01-B3CB-B9ED9F4A5713}.Debug|x64.Build.0 = Debug|x64
 		{806B5E1F-A4EF-4A01-B3CB-B9ED9F4A5713}.Debug|x86.ActiveCfg = Debug|Win32
@@ -69,27 +73,36 @@ Global
 		{0C912E73-47C7-47B3-9C7F-BFC52218EEDC}.Release|x64.Build.0 = Release|x64
 		{0C912E73-47C7-47B3-9C7F-BFC52218EEDC}.Release|x86.ActiveCfg = Release|Win32
 		{0C912E73-47C7-47B3-9C7F-BFC52218EEDC}.Release|x86.Build.0 = Release|Win32
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x64.ActiveCfg = Debug|x64
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x64.Build.0 = Debug|x64
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x86.ActiveCfg = Debug|Win32
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Debug|x86.Build.0 = Debug|Win32
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x64.ActiveCfg = Release|x64
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x64.Build.0 = Release|x64
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x86.ActiveCfg = Release|Win32
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0}.Release|x86.Build.0 = Release|Win32
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x64.ActiveCfg = Debug|x64
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x64.Build.0 = Debug|x64
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x86.ActiveCfg = Debug|Win32
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Debug|x86.Build.0 = Debug|Win32
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x64.ActiveCfg = Release|x64
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x64.Build.0 = Release|x64
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x86.ActiveCfg = Release|Win32
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1}.Release|x86.Build.0 = Release|Win32
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Debug|x64.ActiveCfg = Debug|x64
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Debug|x64.Build.0 = Debug|x64
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Debug|x86.ActiveCfg = Debug|Win32
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Debug|x86.Build.0 = Debug|Win32
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x64.ActiveCfg = Release|x64
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x64.Build.0 = Release|x64
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x86.ActiveCfg = Release|Win32
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
+		{91FE55FD-7C00-4377-AF14-36743DD5521B} = {D25DF5A5-16FD-4C06-A23D-651807BF95A5}
+		{5221D268-5367-4B31-B3D2-697ECAE80E12} = {D25DF5A5-16FD-4C06-A23D-651807BF95A5}
+		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0} = {91FE55FD-7C00-4377-AF14-36743DD5521B}
 		{806B5E1F-A4EF-4A01-B3CB-B9ED9F4A5713} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
 		{3C6D74B5-5827-425E-8453-715838E07F01} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
 		{42D1EBBA-937E-426A-B288-696F6B446B16} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
 		{0C912E73-47C7-47B3-9C7F-BFC52218EEDC} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
-		{A66CE202-2AAA-4A69-81C6-8320EAC4D9A0} = {91FE55FD-7C00-4377-AF14-36743DD5521B}
-		{91FE55FD-7C00-4377-AF14-36743DD5521B} = {D25DF5A5-16FD-4C06-A23D-651807BF95A5}
-		{5221D268-5367-4B31-B3D2-697ECAE80E12} = {D25DF5A5-16FD-4C06-A23D-651807BF95A5}
+		{B77462AE-50E0-42A9-B495-B8FD0EBBC5E1} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
+		{4C4729E4-F194-4E8E-A638-7796EC4C76D6} = {7D6C7252-0E56-4EA2-89EE-28C90D10AC91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A4B16603-B6CA-4EDD-BB60-F28DE6BD46CB}
