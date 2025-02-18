@@ -272,6 +272,9 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     //-------------------TEXTURE CREATING CODE-------------------//
 
     // Use D3DX to create a texture from a file based image
+    // Add 
+    // copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\uv_cheker.bmp" "$(OutDir)uv_cheker.bmp"
+    // To your post build events for auto copying texture to your bin folder
     result = D3DXCreateTextureFromFile(g_Direct3DDevice, "uv_cheker.bmp", &g_Texture);
 
     if (FAILED(result))
