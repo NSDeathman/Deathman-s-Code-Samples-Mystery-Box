@@ -203,9 +203,9 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         DWORD Time = timeGetTime();
 
         // Generating {0; 1} value of RGBA color with sin and cos
-        ClearColor.x = sinf(Time * 0.0005f);
-        ClearColor.y = sinf(Time * 0.0025f);
-        ClearColor.z = sinf(Time * 0.0001f);
+        ClearColor.x = (sinf(Time * 0.0005f) + 1.0f) * 0.5f;
+        ClearColor.y = (sinf(Time * 0.0025f) + 1.0f) * 0.5f;
+        ClearColor.z = (sinf(Time * 0.0001f) + 1.0f) * 0.5f;
 
         // Set alpha to 1.0f (set untransparent color)
         ClearColor.w = 1.0f;
