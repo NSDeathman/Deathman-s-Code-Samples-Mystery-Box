@@ -44,20 +44,6 @@ HWND g_DefaultWindow = nullptr;
 IDirect3D9* g_Direct3D = nullptr;
 IDirect3DDevice9* g_Direct3DDevice = nullptr;
 ///////////////////////////////////////////////////////////////
-// Window procedure function definition
-LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
-{
-    switch (message) 
-    {
-    case WM_DESTROY:
-        PostQuitMessage(NULL); // Post a quit message when the window is destroyed
-        return NULL;
-    }
-
-    // Call default handler for other messages
-    return DefWindowProc(hWnd, message, wParam, lParam);
-}
-///////////////////////////////////////////////////////////////
 // Entry point of the application
 INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT) 
 {

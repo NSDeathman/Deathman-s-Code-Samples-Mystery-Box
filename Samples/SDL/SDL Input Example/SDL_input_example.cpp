@@ -5,30 +5,15 @@
 ///////////////////////////////////////////////////////////////
 // SDL Simply window creating sample
 ///////////////////////////////////////////////////////////////
-// Windows includes (You need to add $(WindowsSDK_IncludePath)
-// to VS include paths of your project)
-#include <iostream>
-#include <ctime>
-#include <windows.h>
+#include "stdafx.h"
 ///////////////////////////////////////////////////////////////
-// Windows libraries
-#pragma comment( lib, "winmm.lib")   
-///////////////////////////////////////////////////////////////
-// SDL Includes (You need to add $(SolutionDir)\Third-Party\Include\
-// to VS include paths of your project) 
-#include <SDL/SDL.h>
-///////////////////////////////////////////////////////////////
-// SDL Libraries (You need to add 
-// $(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\
-// to VS include paths of your project) 
-#pragma comment(lib, "SDL2.lib")
-// Add 
-// copy /Y "$(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\SDL2.dll" "$(OutDir)SDL2.dll"
-// To your post build events for auto copying dll to your bin folder
+// Our input class including
+#include "input.h"
 ///////////////////////////////////////////////////////////////
 // Global variables
 SDL_Window* g_Window = nullptr;
 SDL_Renderer* g_Renderer = nullptr;
+CInput* Input = nullptr;
 ///////////////////////////////////////////////////////////////
 // Entry point of the application
 INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT) 
@@ -53,14 +38,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "Starting application\n";
 
     //-------------------SDL INITIALIZING CODE-------------------//
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << "\n";
         return -1;
     }
 
     // Create an SDL window
-    g_Window = SDL_CreateWindow("SDL2 Sample", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+    g_Window = SDL_CreateWindow("SDL2 Sample", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 300, 300, SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
     if (g_Window == nullptr) 
     {
         std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << "\n";
@@ -69,7 +54,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     }
 
     // Create a rendering context
-    g_Renderer = SDL_CreateRenderer(g_Window, -1, SDL_RENDERER_ACCELERATED);
+    g_Renderer = SDL_CreateRenderer(g_Window, -1, SDL_RENDERER_PRESENTVSYNC);
     if (g_Renderer == nullptr) 
     {
         std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << "\n";
@@ -78,22 +63,61 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         return -1;
     }
 
+    // Initialize our input class
+    Input = new CInput;
+
     //-------------------EVENT LOOP CREATING CODE-------------------//
     // Event loop
     std::cout << "\n";
     std::cout << "Starting event loop \n";
     bool running = true;
-    SDL_Event event;
+    SDL_Event Event;
 
     while (running) 
     {
         // Handle events
-        while (SDL_PollEvent(&event)) 
+        while (SDL_PollEvent(&Event)) 
         {
-            if (event.type == SDL_QUIT) 
+            if (Event.type == SDL_QUIT) 
             {
                 running = false;
             }
+        }
+
+        // Update input every frame
+        Input->OnFrame(Event);
+
+        // Demo prints
+        if(Input->KeyHolded(SDL_SCANCODE_W))
+            std::cout << "W key holded \n";
+
+        if (Input->KeyPressed(SDL_SCANCODE_A))
+            std::cout << "A key pressed \n";
+
+        if (Input->GamepadButtonHolded(SDL_CONTROLLER_BUTTON_A))
+            std::cout << "Gamepad A button holded \n";
+
+        if (Input->GamepadButtonPressed(SDL_CONTROLLER_BUTTON_B))
+            std::cout << "Gamepad B button pressed \n";
+
+        // Get left stick angle value in interval {-1; 1}
+        float LeftStickX, LeftStickY = NULL;
+        Input->GamepadGetLeftStick(LeftStickX, LeftStickY);
+
+        if (LeftStickX != NULL || LeftStickY != NULL)
+        {
+            std::cout << "Gamepad left stick X " << LeftStickX << "Y " << LeftStickY;
+            std::cout << "\n";
+        }
+
+        // Get right stick angle value in interval {-1; 1}
+        float RightStickX, RightStickY = NULL;
+        Input->GamepadGetRightStick(RightStickX, RightStickY);
+
+        if (RightStickX != NULL || RightStickY != NULL)
+        {
+            std::cout << "Gamepad right stick X " << RightStickX << "Y " << RightStickY;
+            std::cout << "\n";
         }
 
         // Clear the screen with a color that changes over time
@@ -119,6 +143,9 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     std::cout << "\n";
     std::cout << "Ending event loop \n";
     std::cout << "Cleaning up resources...\n";
+
+    // Destroy our input class
+    delete(Input);
 
     SDL_DestroyRenderer(g_Renderer);
     SDL_DestroyWindow(g_Window);

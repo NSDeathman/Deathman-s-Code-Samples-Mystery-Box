@@ -315,7 +315,10 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // the aspect ratio, and the near and far clipping planes (which define at
         // what distances geometry should be no longer be rendered).
         D3DXMATRIX matProjection;
-        D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4, g_ScreenResolutionAspectRatio, 1.0f, 100.0f);
+        float Fov = D3DX_PI / 4;
+        float ZNear = 1.0f;
+        float ZFar = 100.0f;
+        D3DXMatrixPerspectiveFovLH(&matProjection, Fov, g_ScreenResolutionAspectRatio, ZNear, ZFar);
         g_Direct3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
         // Clear the back buffer

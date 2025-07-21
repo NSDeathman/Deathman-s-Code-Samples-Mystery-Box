@@ -70,37 +70,37 @@ struct VERTEX_DATA
 
 D3DXVECTOR3 CubeVerticesPositions[CUBE_VERTEX_COUNT] =
 {
-    // Front face vertex data
+    // Front face vertex positions
     D3DXVECTOR3(-1.0f, -1.0f, -1.0f),
     D3DXVECTOR3(-1.0f, 1.0f, -1.0f),
     D3DXVECTOR3(1.0f, 1.0f, -1.0f),
     D3DXVECTOR3(1.0f, -1.0f, -1.0f),
 
-    // Back face vertex data
+    // Back face vertex positions
     D3DXVECTOR3(1.0f, -1.0f, 1.0f),
     D3DXVECTOR3(1.0f, 1.0f, 1.0f),
     D3DXVECTOR3(-1.0f, 1.0f, 1.0f),
     D3DXVECTOR3(-1.0f, -1.0f, 1.0f),
 
-    // Top face vertex data
+    // Top face vertex positions
     D3DXVECTOR3(-1.0f, 1.0f, -1.0f),
     D3DXVECTOR3(-1.0f, 1.0f, 1.0f),
     D3DXVECTOR3(1.0f, 1.0f, 1.0f),
     D3DXVECTOR3(1.0f, 1.0f, -1.0f),
 
-    // Bottom face vertex data
+    // Bottom face vertex positions
     D3DXVECTOR3(-1.0f, -1.0f, -1.0f),
     D3DXVECTOR3(1.0f, -1.0f, -1.0f),
     D3DXVECTOR3(1.0f, -1.0f, 1.0f),
     D3DXVECTOR3(-1.0f, -1.0f, 1.0f),
 
-    // Left face vertex data
+    // Left face vertex positions
     D3DXVECTOR3(-1.0f, -1.0f, 1.0f),
     D3DXVECTOR3(-1.0f, 1.0f, 1.0f),
     D3DXVECTOR3(-1.0f, 1.0f, -1.0f),
     D3DXVECTOR3(-1.0f, -1.0f, -1.0f),
 
-    // Right face vertex data
+    // Right face vertex positions
     D3DXVECTOR3(1.0f, -1.0f, -1.0f),
     D3DXVECTOR3(1.0f, 1.0f, -1.0f),
     D3DXVECTOR3(1.0f, 1.0f, 1.0f),
@@ -136,12 +136,12 @@ WORD CubeIndeces[CUBE_INDEX_COUNT] =
     20, 22, 23
 };
 
+#define CUBE_SIDE_NORMAL_FRONT D3DXVECTOR3(0.0f, 0.0f, -1.0f)
+#define CUBE_SIDE_NORMAL_BACK D3DXVECTOR3(0.0f, 0.0f, 1.0f)
 #define CUBE_SIDE_NORMAL_UP D3DXVECTOR3(0.0f, 1.0f, 0.0f)
 #define CUBE_SIDE_NORMAL_DOWN D3DXVECTOR3(0.0f, -1.0f, 0.0f)
 #define CUBE_SIDE_NORMAL_RIGHT D3DXVECTOR3(1.0f, 0.0f, 0.0f)
 #define CUBE_SIDE_NORMAL_LEFT D3DXVECTOR3(-1.0f, 0.0f, 0.0f)
-#define CUBE_SIDE_NORMAL_FRONT D3DXVECTOR3(0.0f, 0.0f, -1.0f)
-#define CUBE_SIDE_NORMAL_BACK D3DXVECTOR3(0.0f, 0.0f, 1.0f)
 
 D3DXVECTOR3 CubeSidesNormals[6] =
 {
@@ -376,12 +376,12 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
     //-------------------INDEX BUFFER CREATING CODE-------------------//
 
+    std::cout << "\n";
+    std::cout << "Creating index buffer \n";
+
     int IndecesCount = CUBE_INDEX_COUNT;
     float IndexSize = sizeof(WORD);
     UINT IndexBufferSize = IndecesCount * (UINT)IndexSize;
-
-    std::cout << "\n";
-    std::cout << "Creating index buffer \n";
 
     g_Direct3DDevice->CreateIndexBuffer(
         IndexBufferSize,                // Size of the index buffer
@@ -499,7 +499,10 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // the aspect ratio, and the near and far clipping planes (which define at
         // what distances geometry should be no longer be rendered).
         D3DXMATRIX matProjection;
-        D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4, g_ScreenResolutionAspectRatio, 1.0f, 100.0f);
+        float Fov = D3DX_PI / 4;
+        float ZNear = 1.0f;
+        float ZFar = 100.0f;
+        D3DXMatrixPerspectiveFovLH(&matProjection, Fov, g_ScreenResolutionAspectRatio, ZNear, ZFar);
         g_Direct3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
 
         // Clear the back buffer

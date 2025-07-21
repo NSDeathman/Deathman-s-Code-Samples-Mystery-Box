@@ -226,7 +226,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
     if (g_RenderTargetView)
     {
-        std::cout << "Releasing Direct3D Swap chain \n";
+        std::cout << "Releasing Direct3D Render target \n";
         g_RenderTargetView->Release();
         g_RenderTargetView = nullptr;
     }
