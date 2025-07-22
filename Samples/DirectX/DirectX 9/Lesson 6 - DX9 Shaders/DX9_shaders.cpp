@@ -637,47 +637,19 @@ void DrawGeometry()
 ///////////////////////////////////////////////////////////////
 void ClearResources()
 {
-    if (g_VertexShader)
-    {
-        std::cout << "Releasing vertex shader \n";
-        SAFE_RELEASE(g_VertexShader);
-    }
+    SAFE_RELEASE(g_VertexShader);
 
-    if (g_PixelShader)
-    {
-        std::cout << "Releasing pixel shader \n";
-        SAFE_RELEASE(g_PixelShader);
-    }
+    SAFE_RELEASE(g_PixelShader);
 
-    if (g_Texture)
-    {
-        std::cout << "Releasing texture \n";
-        SAFE_RELEASE(g_Texture);
-    }
+    SAFE_RELEASE(g_Texture);
 
-    if (g_IndexBuffer)
-    {
-        std::cout << "Releasing index buffer \n";
-        SAFE_RELEASE(g_IndexBuffer);
-    }
+    SAFE_RELEASE(g_IndexBuffer);
 
-    if (g_VertexBuffer)
-    {
-        std::cout << "Releasing vertex buffer \n";
-        SAFE_RELEASE(g_VertexBuffer);
-    }
+    SAFE_RELEASE(g_VertexBuffer);
 
-    if (g_Direct3DDevice)
-    {
-        std::cout << "Releasing Direct3D Device \n";
-        SAFE_RELEASE(g_Direct3DDevice);
-    }
+    SAFE_RELEASE(g_Direct3DDevice);
 
-    if (g_Direct3D)
-    {
-        std::cout << "Releasing Direct3D \n";
-        SAFE_RELEASE(g_Direct3D);
-    }
+    SAFE_RELEASE(g_Direct3D);
 }
 ///////////////////////////////////////////////////////////////
 // Entry point of the application
