@@ -19,7 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DX9_shaders.cpp" />
+    <ClCompile Include="Simple triangle example.cpp" />
+    <ClCompile Include="DX9_Shaders.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shader.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

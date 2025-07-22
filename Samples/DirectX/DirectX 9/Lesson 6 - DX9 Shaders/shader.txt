@@ -1,0 +1,76 @@
+// Matrix uniforms for transformation and projection
+uniform float4x4 matWorld;                  // World matrix: transforms object space to world space
+uniform float4x4 matView;                   // View matrix: transforms world space to camera/view space
+uniform float4x4 matProjection;             // Projection matrix: transforms view space to clip space
+uniform float4x4 matWorldView;              // Combined world and view matrix
+uniform float4x4 matWorldViewProjection;    // Combined world, view, and projection matrix
+
+// Texture sampler for the albedo (color) texture
+uniform sampler2D smpAlbedo : register(s0); // Sampler for accessing the albedo texture, bound to register s0
+
+// Input structure for vertex shader
+struct VertexInput
+{
+    float3 Position : POSITION; // Vertex position in object space
+    float3 Normal : NORMAL;     // Vertex normal vector in object space
+    float3 Color : COLOR0;      // Vertex color (often used for per-vertex coloring)
+    float2 UV : TEXCOORD0;      // Texture coordinates for sampling the texture
+};
+
+// Output structure for interpolated data sent to the pixel shader
+struct Interpolators
+{
+    float4 HomogeniousPosition : POSITION; // Transformed position in homogeneous coordinates for rasterization
+    float3 Position : TEXCOORD0;           // Position in view space for lighting calculations
+    float3 Normal : TEXCOORD1;             // Normal in view space for lighting calculations
+    float3 Color : TEXCOORD2;              // Color passed to the pixel shader
+    float2 UV : TEXCOORD3;                 // Texture coordinates passed to the pixel shader
+};
+
+// Vertex shader main function
+Interpolators VSMain(VertexInput Input)
+{
+    Interpolators Output; // Create an instance of the output structure
+
+    // Transform the vertex position by the combined World, View, and Projection matrix
+    Output.HomogeniousPosition = mul(float4(Input.Position, 1.0f), matWorldViewProjection);
+    
+    // Calculate the vertex position in view space
+    Output.Position = mul(float4(Input.Position, 1.0f), matWorldView).xyz;
+
+    // Transform the normal vector to view space; note that the last parameter set to 0.0f indicates a direction vector
+    Output.Normal = mul(float4(Input.Normal, 0.0f), matWorldView).xyz;
+
+    // Pass through the color and UV coordinates directly
+    Output.Color = Input.Color;
+    Output.UV = Input.UV;
+
+    return Output; // Return the interpolated data for use in the pixel shader
+}
+
+// Pixel shader main function
+float4 PSMain(Interpolators Input) : COLOR0
+{
+    // Sample the albedo texture using the UV coordinates provided from the vertex shader
+    float4 Albedo = tex2D(smpAlbedo, Input.UV);
+
+    // Apply gamma correction to the sampled color (assumed linear to sRGB conversion)
+    Albedo = pow(abs(Albedo), 2.2f);
+
+    // Calculate the view direction vector by negating the normalized position vector in view space
+    float3 ViewDirection = -normalize(Input.Position);
+
+    // Normalize the normal vector for lighting calculations
+    float3 Normal = normalize(Input.Normal);
+
+    // Compute the dot product between the normal and view direction, giving the cosine of the angle between them
+    float NdotV = dot(Normal, ViewDirection);
+
+    // Calculate the final color based on the texture color and the NdotV value for basic diffuse lighting
+    float4 FinalColor = Albedo * NdotV;
+
+    // Apply inverse gamma correction back to linear space for rendering
+    FinalColor = pow(abs(FinalColor), 1.0f / 2.2f);
+
+    return FinalColor; // Return the final color which will be used as the fragment's output color
+}

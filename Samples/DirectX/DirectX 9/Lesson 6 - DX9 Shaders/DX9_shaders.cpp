@@ -17,7 +17,6 @@
 // Includes (You need to add $(DXSDK_DIR)Include\ to VS 
 // include paths of your project) 
 #include <d3dx9.h>
-#include <vector>
 ///////////////////////////////////////////////////////////////
 // Libraries (You need to add 
 // $(DXSDK_DIR)Lib\$(LibrariesArchitecture)\ to VS include 
@@ -25,19 +24,17 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
 ///////////////////////////////////////////////////////////////
-// Debug defines
-//#define DEBUG_SHOW_WIREFRAME
-//#define DEBUG_SHOW_VERTECES
-
-#define SHOW_NORMALS 1
-#define SHOW_UV 2
-//#define DEBUG_SHOW_VERTEX_COLOR SHOW_NORMALS
-///////////////////////////////////////////////////////////////
 // Global variables
 IDirect3D9* g_Direct3D = nullptr;
 IDirect3DDevice9* g_Direct3DDevice = nullptr;
 D3DPRESENT_PARAMETERS g_Direct3DPresentationParams = {};
+///////////////////////////////////////////////////////////////
 HWND g_Window = nullptr;
+///////////////////////////////////////////////////////////////
+IDirect3DVertexShader9* g_VertexShader;
+ID3DXConstantTable* g_VertexShaderConstantTable;
+IDirect3DPixelShader9* g_PixelShader;
+ID3DXConstantTable* g_PixelShaderConstantTable;
 ///////////////////////////////////////////////////////////////
 bool g_bNeedReset = false;
 bool g_bNeedCloseApplication = false;
@@ -55,12 +52,6 @@ LPDIRECT3DTEXTURE9 g_Texture = nullptr;
 LPDIRECT3DVERTEXBUFFER9 g_VertexBuffer = nullptr;
 LPDIRECT3DINDEXBUFFER9 g_IndexBuffer = nullptr;
 ///////////////////////////////////////////////////////////////
-ID3DXMesh* pMesh = NULL;
-///////////////////////////////////////////////////////////////
-IDirect3DVertexShader9* g_vertexShader;
-IDirect3DPixelShader9* g_pixelShader;
-ID3DXConstantTable* g_pConstantTable;
-///////////////////////////////////////////////////////////////
 // Vertex attributes
 struct VERTEX_DATA
 {
@@ -69,14 +60,19 @@ struct VERTEX_DATA
     D3DCOLOR Color;
     D3DXVECTOR2 UV;
 };
-#define VERTEXFVF (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1) 
 
-// Vertex declaration
-D3DVERTEXELEMENT9 VERTEX_DECL[] = { {0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-                                    {0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0},
-                                    {0, 24, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
-                                    {0, 36, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-                                    D3DDECL_END() };
+LPDIRECT3DVERTEXDECLARATION9 g_VertexDeclaration = NULL;
+
+D3DVERTEXELEMENT9 Declaration[] =
+{
+    { 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+    { 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
+    { 0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+    { 0, 36, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+    D3DDECL_END()
+};
+
+#define VERTEXFVF (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1) 
 ///////////////////////////////////////////////////////////////
 // Cube attrubutes
 #define CUBE_VERTEX_COUNT 24
@@ -153,8 +149,8 @@ WORD CubeIndeces[CUBE_INDEX_COUNT] =
 #define CUBE_SIDE_NORMAL_BACK D3DXVECTOR3(0.0f, 0.0f, 1.0f)
 #define CUBE_SIDE_NORMAL_UP D3DXVECTOR3(0.0f, 1.0f, 0.0f)
 #define CUBE_SIDE_NORMAL_DOWN D3DXVECTOR3(0.0f, -1.0f, 0.0f)
-#define CUBE_SIDE_NORMAL_RIGHT D3DXVECTOR3(1.0f, 0.0f, 0.0f)
-#define CUBE_SIDE_NORMAL_LEFT D3DXVECTOR3(-1.0f, 0.0f, 0.0f)
+#define CUBE_SIDE_NORMAL_RIGHT D3DXVECTOR3(-1.0f, 0.0f, 0.0f)
+#define CUBE_SIDE_NORMAL_LEFT D3DXVECTOR3(1.0f, 0.0f, 0.0f)
 
 D3DXVECTOR3 CubeSidesNormals[6] =
 {
@@ -173,6 +169,27 @@ D3DXVECTOR2 CubeSideUV[4] =
     D3DXVECTOR2(1.0f, 0.0f),
     D3DXVECTOR2(1.0f, 1.0f),
 };
+///////////////////////////////////////////////////////////////
+#define SAFE_RELEASE(x)		\
+	{						\
+		if (x)				\
+		{					\
+			(x)->Release();	\
+			(x) = NULL;		\
+		}					\
+	}
+
+void MakeErrorMessage(LPCSTR Message)
+{
+    MessageBox(NULL, Message, "DX9 Sample.exe", MB_OK);
+    g_bNeedCloseApplication = true;
+}
+
+void Assert(bool Condition, LPCSTR Message)
+{
+    if(Condition)
+        MakeErrorMessage(Message);
+}
 ///////////////////////////////////////////////////////////////
 // Window procedure function definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -233,20 +250,18 @@ void CreateMainWindow(HINSTANCE hInstance)
     RegisterClass(&WindClass);
 
     // Create the window
-    g_Window = CreateWindowEx(
-        NULL,                       // Optional window styles
-        window_class_name,          // Window class
-        window_name,                // Window text
-        WS_OVERLAPPEDWINDOW,        // Window style
-        CW_USEDEFAULT,              // Position X
-        CW_USEDEFAULT,              // Position Y
-        g_ScreenHeight,             // Size X
-        g_ScreenWidth,              // Size Y
-        NULL,                       // Parent window
-        NULL,                       // Menu
-        WindClass.hInstance,        // Instance handle
-        NULL                        // Additional application data
-    );
+    g_Window = CreateWindowEx( NULL,                       // Optional window styles
+                               window_class_name,          // Window class
+                               window_name,                // Window text
+                               WS_OVERLAPPEDWINDOW,        // Window style
+                               CW_USEDEFAULT,              // Position X
+                               CW_USEDEFAULT,              // Position Y
+                               g_ScreenHeight,             // Size X
+                               g_ScreenWidth,              // Size Y
+                               NULL,                       // Parent window
+                               NULL,                       // Menu
+                               WindClass.hInstance,        // Instance handle
+                               NULL );                     // Additional application data
 
     if (g_Window == NULL)
     {
@@ -280,21 +295,15 @@ void CreateDirect3D()
 
     // Create the device
     std::cout << "Creating Direct3D 9 Device \n";
-    result = g_Direct3D->CreateDevice(
-        D3DADAPTER_DEFAULT,
-        D3DDEVTYPE_HAL,
-        g_Window, // Pass the window handle here
-        D3DCREATE_HARDWARE_VERTEXPROCESSING,
-        &g_Direct3DPresentationParams,
-        &g_Direct3DDevice
-    );
+    result = g_Direct3D->CreateDevice( D3DADAPTER_DEFAULT,
+                                       D3DDEVTYPE_HAL,
+                                       g_Window, // Pass the window handle here
+                                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
+                                       &g_Direct3DPresentationParams,
+                                       &g_Direct3DDevice );
 
-    if (FAILED(result))
-    {
-        // Handle device creation failure (add your error handling here)
-        MessageBox(NULL, "Error in Direct3D 9 Device creating procedure", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
-    }
+    // Handle device creation failure (add your error handling here)
+    Assert(FAILED(result), "Error in Direct3D 9 Device creating procedure");
 }
 ///////////////////////////////////////////////////////////////
 void LoadTextures()
@@ -305,190 +314,175 @@ void LoadTextures()
     // To your post build events for auto copying texture to your bin folder
     HRESULT result = D3DXCreateTextureFromFile(g_Direct3DDevice, "uv_cheker.bmp", &g_Texture);
 
-    if (FAILED(result))
-    {
-        MessageBox(NULL, "Could not find uv_cheker.bmp", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
-    }
+    Assert(FAILED(result), "Could not find uv_cheker.bmp");
 }
 ///////////////////////////////////////////////////////////////
 void CompileShaders()
 {
-    std::cout << "Compiling shaders... \n";
-
     // Result value for handle function execution result
     HRESULT result = E_FAIL;
 
-    ID3DXBuffer* vertexShaderBuffer = NULL;
-    ID3DXBuffer* errorBuffer = NULL;
+    ID3DXBuffer* ErrorBuffer = NULL;
 
-    std::string ObjectShaderPath = (std::string)"object_shader.hlsl";
-
+    // Vertex shader
+    ID3DXBuffer* VertexShaderBuffer = NULL;
+    std::string ObjectShaderPath = (std::string)"shader.txt";
     std::cout << "Compiling vertex shader \n";
-    result = D3DXCompileShaderFromFile(ObjectShaderPath.c_str(),
-        nullptr,
-        nullptr,
-        "VSMain",
-        "vs_3_0",
-        NULL,
-        &vertexShaderBuffer,
-        &errorBuffer,
-        &g_pConstantTable);
+    result = D3DXCompileShaderFromFile( ObjectShaderPath.c_str(),
+                                        nullptr,
+                                        nullptr,
+                                        "VSMain",
+                                        "vs_3_0",
+                                        NULL,
+                                        &VertexShaderBuffer,
+                                        &ErrorBuffer,
+                                        &g_VertexShaderConstantTable );
 
-    if (errorBuffer)
+    if (ErrorBuffer)
     {
         std::cout << "Vertex shader error \n";
-        std::cout << (char*)errorBuffer->GetBufferPointer();
+        std::cout << (char*)ErrorBuffer->GetBufferPointer();
         std::cout << "\n";
     }
 
     if (FAILED(result))
     {
-        MessageBoxA(nullptr, (char*)errorBuffer->GetBufferPointer(), "Shader Error", MB_OK);
-        errorBuffer->Release();
-        return;
+        MakeErrorMessage((char*)ErrorBuffer->GetBufferPointer());
+        ErrorBuffer->Release();
     }
 
-    g_Direct3DDevice->CreateVertexShader((DWORD*)vertexShaderBuffer->GetBufferPointer(), &g_vertexShader);
-    vertexShaderBuffer->Release();
+    g_Direct3DDevice->CreateVertexShader((DWORD*)VertexShaderBuffer->GetBufferPointer(), &g_VertexShader);
 
+    // Pixel shader
     ID3DXBuffer* PixelShaderBuffer = NULL;
-
     std::cout << "Compiling pixel shader \n";
-    result = D3DXCompileShaderFromFile(ObjectShaderPath.c_str(),
-        nullptr,
-        nullptr,
-        "PSMain",
-        "ps_3_0",
-        NULL,
-        &PixelShaderBuffer,
-        &errorBuffer,
-        &g_pConstantTable);
+    result = D3DXCompileShaderFromFile( ObjectShaderPath.c_str(),
+                                        nullptr,
+                                        nullptr,
+                                        "PSMain",
+                                        "ps_3_0",
+                                        NULL,
+                                        &PixelShaderBuffer,
+                                        &ErrorBuffer,
+                                        &g_PixelShaderConstantTable );
 
-    if (errorBuffer)
+    if (ErrorBuffer)
     {
         std::cout << "Pixel shader error \n";
-        std::cout << (char*)errorBuffer->GetBufferPointer();
+        std::cout << (char*)ErrorBuffer->GetBufferPointer();
         std::cout << "\n";
     }
 
     if (FAILED(result))
     {
-        MessageBoxA(nullptr, (char*)errorBuffer->GetBufferPointer(), "Shader Error", MB_OK);
-        errorBuffer->Release();
-        return;
+        MakeErrorMessage((char*)ErrorBuffer->GetBufferPointer());
+        ErrorBuffer->Release();
     }
 
-    g_Direct3DDevice->CreatePixelShader((DWORD*)PixelShaderBuffer->GetBufferPointer(), &g_pixelShader);
-    PixelShaderBuffer->Release();
+    g_Direct3DDevice->CreatePixelShader((DWORD*)PixelShaderBuffer->GetBufferPointer(), &g_PixelShader);
 }
 ///////////////////////////////////////////////////////////////
 void CreateGeometry()
 {
-    // Result value for handle function execution result
-    HRESULT result = E_FAIL;
+    // Create a vertex declaration which describes the vertex format used in the vertex buffer
+    g_Direct3DDevice->CreateVertexDeclaration(Declaration, &g_VertexDeclaration);
+
+    // Log creation of the vertex buffer
+    std::cout << "\n";
+    std::cout << "Creating vertex buffer \n";
 
     // Prepare vertex buffer data
-    float VertexDataSize = sizeof(VERTEX_DATA);
-    UINT TrianglesCount = CUBE_TRIANGLES_COUNT;
-    UINT VertecesCount = TrianglesCount * 3;
-    UINT VertexBufferSize = (UINT)VertexDataSize * VertecesCount;
+    float VertexDataSize = sizeof(VERTEX_DATA); // Size of a single vertex structure
+    UINT TrianglesCount = CUBE_TRIANGLES_COUNT;  // Total number of triangles in the cube
+    UINT VertecesCount = TrianglesCount * 3;     // Each triangle has 3 vertices
+    UINT VertexBufferSize = (UINT)VertexDataSize * VertecesCount; // Total size required for the vertex buffer
 
-    // Create and fill the vertex buffer
-    std::cout << "\n";
-    std::cout << "Creating mesh \n";
+    // Create the vertex buffer in managed memory pool with specified parameters
+    g_Direct3DDevice->CreateVertexBuffer(VertexBufferSize, // Size of the vertex buffer
+                                          NULL,             // Usage flag (default)
+                                          VERTEXFVF,        // Flexible Vertex Format (defines the layout of the vertex data)
+                                          D3DPOOL_MANAGED,  // Memory pool type (managed by Direct3D)
+                                          &g_VertexBuffer,  // Pointer to the created vertex buffer
+                                          NULL);            // Handle to the resource (not needed here)
 
-    // Create the encapsulated mesh
-    result = D3DXCreateMesh(TrianglesCount,
-        VertecesCount,
-        D3DXMESH_MANAGED | D3DXMESH_32BIT,
-        VERTEX_DECL, g_Direct3DDevice, &pMesh);
+    // Result variable to check success/failure of operations
+    HRESULT result = E_FAIL;
 
     // Fill the vertex buffer with data
-    VERTEX_DATA* VerticesData;
-    std::cout << "Locking vertex buffer \n";
-    result = pMesh->LockVertexBuffer(NULL, (void**)&VerticesData);
+    VERTEX_DATA* VerticesData; // Pointer to hold vertex data during locking
+    std::cout << "Locking vertex buffer \n"; // Indicating that we're about to fill the buffer
+    // Lock the vertex buffer to gain access to write data into it
+    result = g_VertexBuffer->Lock(NULL, sizeof(VerticesData), (void**)&VerticesData, NULL);
 
-    if (FAILED(result))
-    {
-        MessageBox(NULL, "Error in vertex buffer locking procedure", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
-    }
+    // Check if locking was successful; if not, assert and show an error message
+    Assert(FAILED(result), "Error in vertex buffer locking procedure");
 
-    // Define a triangles
+    // Log filling process of vertex buffer
     std::cout << "Filling vertex buffer \n";
 
-    // Iterate all vertices for define they attributes
-    // Total vertices iterator is value in {0, CUBE_VERTEX_COUNT} interval, and it needs for iterate all vertices of cube
-    // Side vertices iterator is value in {0; 4} interval, and it needs for get data from per side vertices data arrays
-    // Side identificator is value in {0; 6} interval, and it needs for get data for all side of cube 
-    for (int total_vertices_iterator = 0, side_vertices_iterator = 0, side_id = 0; total_vertices_iterator < CUBE_VERTEX_COUNT; total_vertices_iterator++, side_vertices_iterator++)
+    // Iterate through all vertices to define their attributes
+    // Total vertices iterator ranges over the total number of vertices defined for the cube
+    // Side vertices iterator helps track vertices corresponding to each side of the cube
+    // Side identifier keeps track of which side of the cube is being processed
+    for (int total_vertices_iterator = 0, side_vertices_iterator = 0, side_id = 0; 
+         total_vertices_iterator < CUBE_VERTEX_COUNT; 
+         total_vertices_iterator++, side_vertices_iterator++)
     {
-        // Update support iterators
+        // Reset side vertices iterator and increment side_id after processing 4 vertices per side
         if (side_vertices_iterator > 3)
         {
-            side_vertices_iterator = 0;
-            side_id++;
+            side_vertices_iterator = 0; // Reset to first vertex on next iteration
+            side_id++; // Move to the next side of the cube
         }
 
+        // Assign position, color, normal, and UV mapping to the current vertex
         VerticesData[total_vertices_iterator].Position = CubeVerticesPositions[total_vertices_iterator];
-        VerticesData[total_vertices_iterator].Color = { D3DCOLOR_XRGB(255, 255, 255) };
-        VerticesData[total_vertices_iterator].Normal = CubeSidesNormals[side_id];
-        VerticesData[total_vertices_iterator].UV = CubeSideUV[side_vertices_iterator];
-
-        // Debug stuff
-#if DEBUG_SHOW_VERTEX_COLOR == SHOW_NORMALS
-        D3DXVECTOR3 VertexNormalColor = { 0, 0, 0 };
-
-        // For debug draw normals need be transformed from {-1; 1} interval to {0, 1}
-        VertexNormalColor.x = (VerticesData[total_vertices_iterator].Normal.x + 1.0f) * 0.5f;
-        VertexNormalColor.y = (VerticesData[total_vertices_iterator].Normal.y + 1.0f) * 0.5f;
-        VertexNormalColor.z = (VerticesData[total_vertices_iterator].Normal.z + 1.0f) * 0.5f;
-
-        VerticesData[total_vertices_iterator].Color = { D3DCOLOR_XRGB((int)(VertexNormalColor.x * 255),
-                                                                      (int)(VertexNormalColor.y * 255),
-                                                                      (int)(VertexNormalColor.z * 255)) };
-#elif DEBUG_SHOW_VERTEX_COLOR == SHOW_UV
-        VerticesData[total_vertices_iterator].Color = { D3DCOLOR_XRGB((int)(VerticesData[total_vertices_iterator].UV.x * 255),
-                                                                      (int)(VerticesData[total_vertices_iterator].UV.y * 255),
-                                                                      0) };
-#endif
+        VerticesData[total_vertices_iterator].Color = { D3DCOLOR_XRGB(255, 255, 255) }; // Set color to white
+        VerticesData[total_vertices_iterator].Normal = CubeSidesNormals[side_id]; // Get the normal for the current side
+        VerticesData[total_vertices_iterator].UV = CubeSideUV[side_vertices_iterator]; // Assign UV coordinates
     }
 
+    // Unlock the vertex buffer after filling it with data
     std::cout << "Unlocking vertex buffer \n";
-    result = pMesh->UnlockVertexBuffer();
+    result = g_VertexBuffer->Unlock(); // Unlocking the buffer allows GPU to access the data
 
-    if (FAILED(result))
-    {
-        MessageBox(NULL, "Error in vertex buffer unlocking procedure", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
-    }
+    // Check if unlocking was successful; if not, assert and show an error message
+    Assert(FAILED(result), "Error in vertex buffer unlocking procedure");
+
+    // Create and fill index buffer
+    std::cout << "\n";
+    std::cout << "Creating index buffer \n";
+
+    // Prepare index buffer data
+    int IndecesCount = CUBE_INDEX_COUNT; // Total number of indices required
+    float IndexSize = sizeof(WORD); // Size of an individual index (16 bits)
+    UINT IndexBufferSize = IndecesCount * (UINT)IndexSize; // Calculate total size of the index buffer
+
+    // Create the index buffer with specified parameters
+    g_Direct3DDevice->CreateIndexBuffer( IndexBufferSize,       // Size of the index buffer
+                                         D3DUSAGE_WRITEONLY,    // Buffer usage (write-only)
+                                         D3DFMT_INDEX16,        // Format of the indices (16-bit)
+                                         D3DPOOL_MANAGED,       // Memory access
+                                         &g_IndexBuffer,        // Index buffer
+                                         0 );                   // Handle to the resource
 
     // Fill the index buffer
     WORD* Indeces = 0;
     std::cout << "Locking index buffer \n";
-    result = pMesh->LockIndexBuffer(0, (void**)&Indeces);
+    result = g_IndexBuffer->Lock(0, 0, (void**)&Indeces, 0);
 
-    if (FAILED(result))
-    {
-        MessageBox(NULL, "Error in index buffer locking procedure", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
-    }
+    Assert(FAILED(result), "Error in index buffer locking procedure");
 
     std::cout << "Filling index buffer \n";
-    for (int iterator = 0; iterator < CUBE_INDEX_COUNT; iterator++)
+    for (int iterator = 0; iterator < IndecesCount; iterator++)
     {
         Indeces[iterator] = CubeIndeces[iterator];
     }
 
     std::cout << "Unlocking index buffer \n";
-    result = pMesh->UnlockIndexBuffer();
+    result = g_IndexBuffer->Unlock();
 
-    if (FAILED(result))
-    {
-        MessageBox(NULL, "Error in index buffer unlocking procedure", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
-    }
+    Assert(FAILED(result), "Error in index buffer unlocking procedure");
 }
 ///////////////////////////////////////////////////////////////
 void HandleDeviceLost()
@@ -504,13 +498,11 @@ void HandleDeviceLost()
 ///////////////////////////////////////////////////////////////
 void ResetDirect3D()
 {
-    HRESULT result = g_Direct3DDevice->Reset(&g_Direct3DPresentationParams);
+    HRESULT result = E_FAIL;
 
-    if (result == D3DERR_INVALIDCALL)
-    {
-        std::cout << "Invalid call while device resetting \n";
-        g_bNeedCloseApplication = true;
-    }
+    result = g_Direct3DDevice->Reset(&g_Direct3DPresentationParams);
+
+    Assert(result == D3DERR_INVALIDCALL, "Invalid call while device resetting");
 }
 ///////////////////////////////////////////////////////////////
 void ResizeWindow()
@@ -526,9 +518,15 @@ void ResizeWindow()
 ///////////////////////////////////////////////////////////////
 void UpdateTransformMatrices()
 {
-    // For our world matrix, we will just rotate the object about the y-axis.
+    //-- World Matrix --//
+    // The World Matrix defines the position, rotation, and scale of an object in the world space. 
+    // It transforms local object coordinates (object space) into world coordinates.
+    //      Translation: Moves the object to its desired location.
+    //      Rotation: Affects the orientation of the object.
+    //      Scaling: Changes the size of the object.
     D3DXMATRIX matWorld;
 
+    // For our world matrix, we will just rotate the object about the y-axis.
     // Set up the rotation matrix to generate 1 full rotation (2*PI radians) 
     // every 1000 ms. To avoid the loss of precision inherent in very high 
     // floating point numbers, the system time is modulated by the rotation 
@@ -536,7 +534,14 @@ void UpdateTransformMatrices()
     UINT iTime = timeGetTime();
     FLOAT fAngle = iTime * (2.0f * D3DX_PI) / 2500.0f;
     D3DXMatrixRotationY(&matWorld, fAngle);
-    g_Direct3DDevice->SetTransform(D3DTS_WORLD, &matWorld);
+    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorld", &matWorld);
+
+    //-- View Matrix --//
+    // The View Matrix defines the camera's position and orientation in the world. 
+    // It essentially represents the transformation needed to convert world coordinates into view coordinates (camera space).
+    //      Eye Position : Where the camera is located in the world.
+    //      Look - at Point : The point in the world that the camera is looking at.
+    //      Up Vector : Defines which direction is "up" for the camera, helping to create the proper orientation.
 
     // Set up our view matrix. A view matrix can be defined given an eye point,
     // a point to lookat, and a direction for which way is up. Here, we set the
@@ -547,7 +552,14 @@ void UpdateTransformMatrices()
     D3DXVECTOR3 vUpVec(0.0f, 1.0f, 0.0f);
     D3DXMATRIX matView;
     D3DXMatrixLookAtLH(&matView, &vEyePt, &vLookatPt, &vUpVec);
-    g_Direct3DDevice->SetTransform(D3DTS_VIEW, &matView);
+    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matView", &matView);
+
+    //-- Projection Matrix --//
+    // Although not a part of the WorldView matrix, 
+    // it's essential to understand it since it’s combined with the WorldView matrix 
+    // to form the WorldViewProjection matrix. 
+    // The Projection Matrix transforms coordinates from view space to normalized device coordinates (NDC), 
+    // preparing them for perspective division and viewport transformation.
 
     // For the projection matrix, we set up a perspective transform (which
     // transforms geometry from 3D view space to 2D viewport space, with
@@ -556,177 +568,121 @@ void UpdateTransformMatrices()
     // the aspect ratio, and the near and far clipping planes (which define at
     // what distances geometry should be no longer be rendered).
     D3DXMATRIX matProjection;
-    D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4, g_ScreenResolutionAspectRatio, 1.0f, 100.0f);
-    g_Direct3DDevice->SetTransform(D3DTS_PROJECTION, &matProjection);
+    float Fov = D3DX_PI / 4;
+    float ZNear = 1.0f;
+    float ZFar = 100.0f;
+    D3DXMatrixPerspectiveFovLH(&matProjection, Fov, g_ScreenResolutionAspectRatio, ZNear, ZFar);
+    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matProjection", &matProjection);
 
-    // For transform vertex position in our shader we need this
-    D3DXMATRIX matWorldViewProjection = matWorld * matView * matProjection;
+    //-- WorldView Matrix --//
+    // The WorldView Matrix combines the Worldand View matrices.
+    // It transforms coordinates from object space to view space.
+    // This matrix is formed by multiplying the World matrix by the View matrix :
+    D3DXMATRIX matWorldView;
+    matWorldView = matWorld * matView;
+    D3DXMATRIX matWorldViewTransposed;
+    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldView", &matWorldView);
+
+    //-- WorldViewProjection Matrix --//
+    // The WorldViewProjection(WVP) Matrix is the combination of the World, View, and Projection matrices.
+    // It transforms coordinates from object space directly to clip space in a single operation :
+    D3DXMATRIX matWorldViewProjection;
+    matWorldViewProjection = matWorld * matView * matProjection;
     D3DXMATRIX matWorldViewProjectionTransposed;
-    D3DXMatrixTranspose(&matWorldViewProjectionTransposed, &matWorldViewProjection);
-
-    // Send our matrix to vertex shader as constant and bind it to register C0
-    // Next constant must be placed in register C4 (C0 register + 4 is bisy)
-    g_Direct3DDevice->SetVertexShaderConstantF(0, matWorldViewProjectionTransposed, 4);
+    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldViewProjection", &matWorldViewProjection);
 }
 ///////////////////////////////////////////////////////////////
 void DrawGeometry()
 {
-#if defined(DEBUG_SHOW_WIREFRAME)
-    // Disable backface culling
-    g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    // Enable backface culling to prevent rendering of faces that are facing away from the camera,
+    // improving performance by reducing the number of triangles processed.
+    g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); // Counter-clockwise face culling
 
-    // Enable FFP lighting for draw our wireframe black
-    g_Direct3DDevice->SetRenderState(D3DRS_LIGHTING, true);
+    // Setup our texture. Bind the texture resource to the shader's texture register (S0).
+    // This allows the pixel shader to access and use this texture when rendering the geometry.
+    g_Direct3DDevice->SetTexture(0, g_Texture); // Texture stage 0 (S0) is being set with the texture resource
 
-    // Set triangle filling from solid to wireframe
-    g_Direct3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-#elif defined(DEBUG_SHOW_VERTECES)
-    // Disable backface culling
-    g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    // Set the vertex buffer as the active source for vertex data. 
+    // The vertex buffer will be read starting at offset 0, and each vertex is of size sizeof(VERTEX_DATA).
+    g_Direct3DDevice->SetStreamSource(0, g_VertexBuffer, 0, sizeof(VERTEX_DATA));
 
-    // Enable FFP lighting for draw our wireframe black
-    g_Direct3DDevice->SetRenderState(D3DRS_LIGHTING, true);
-
-    // Set triangle filling from solid to point
-    g_Direct3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_POINT);
-#else
-    // Enable backface culling
-    g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-
-    // Disable FFP lighting
-    g_Direct3DDevice->SetRenderState(D3DRS_LIGHTING, false);
-#endif
-
-    // Setup our texture. Using textures introduces the texture stage states,
-    // which govern how textures get blended together (in the case of multiple
-    // textures) and lighting information. In this case, we are modulating
-    // (blending) our texture with the diffuse color of the vertices.
-#ifndef DEBUG_SHOW_VERTEX_COLOR
-    g_Direct3DDevice->SetTexture(0, g_Texture);
-    g_Direct3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    g_Direct3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    g_Direct3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-    g_Direct3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-#else
-    // Set vertex color to output to screen
-    g_Direct3DDevice->SetRenderState(D3DRS_COLORVERTEX, TRUE);
-
-    // Set ambient lighting color 
-    g_Direct3DDevice->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_ARGB(255, 255, 255, 255));
-
-    // Set vertex color to diffuse color of material
-    g_Direct3DDevice->SetRenderState(D3DRS_AMBIENTMATERIALSOURCE, D3DMCS_COLOR1);
-#endif
-
-    // Set the vertex buffer to be active
-    pMesh->GetVertexBuffer(&g_VertexBuffer);
-    g_Direct3DDevice->SetStreamSource(0, g_VertexBuffer, 0, ::D3DXGetFVFVertexSize(pMesh->GetFVF()));
-
-    // Set the index buffer to be active
-    pMesh->GetIndexBuffer(&g_IndexBuffer);
+    // Set the index buffer as the source for indices that define which vertices to draw.
+    // This allows indexed drawing, which is more efficient than drawing each vertex individually.
     g_Direct3DDevice->SetIndices(g_IndexBuffer);
 
-    // Set the FVF
-    g_Direct3DDevice->SetFVF(::D3DXGetFVFVertexSize(pMesh->GetFVF()));
+    // Specify the Flexible Vertex Format (FVF) to inform the graphics pipeline about vertex structure/layout.
+    // This format includes information such as position, color, normal, and texture coordinates of each vertex.
+    g_Direct3DDevice->SetFVF(VERTEXFVF);
 
-    DWORD size = 0;
-    pMesh->GetAttributeTable(NULL, &size);
-    if (size)
-    {
-        std::vector<D3DXATTRIBUTERANGE> table(size);
-        pMesh->GetAttributeTable(&table[0], &size);
-        for (UINT i = 0; i < size; i++)
-        {
-            //set_state(device, table[i].Attribid);
-            g_Direct3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-                table[i].VertexStart, NULL, table[i].VertexCount,
-                table[i].FaceStart * 3, table[i].FaceCount);
-        }
-    }
-    else
-    {
-        //set_default_state();
-    //    g_Direct3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-    //        0, pMesh->GetNumVertices(), 0, pMesh->GetNumFaces()));
-    }
+    // Set the vertex shader to be used for processing vertex data.
+    // The vertex shader will transform vertices and perform any necessary manipulations before rasterization.
+    g_Direct3DDevice->SetVertexShader(g_VertexShader);
 
-    // Draw the primitive with indeces
-    //g_Direct3DDevice->DrawIndexedPrimitive(
-    //    D3DPT_TRIANGLELIST,
-    //    NULL,
-    //    NULL,
-    //    CUBE_VERTEX_COUNT,
-    //    NULL,
-    //    CUBE_TRIANGLES_COUNT);
+    // Set the pixel shader that will process the pixels of the rendered output.
+    // This shader determines how the final colors of the pixels are computed using texture and lighting.
+    g_Direct3DDevice->SetPixelShader(g_PixelShader);
 
-    //pMesh->DrawSubset(0);
+    // Draw the primitive using indexed drawing. Here we specify:
+    // - The type of primitive to render (D3DPT_TRIANGLELIST means each set of three indices defines a triangle).
+    // - NULL parameters for the base vertex index (not used), base vertex for offset calculation (not used),
+    //   total vertex count (CUBE_VERTEX_COUNT), and start index in the index buffer (NULL for automatic handling).
+    // - The number of triangles to draw (CUBE_TRIANGLES_COUNT), which corresponds to the number of triangles defined.
+    g_Direct3DDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST,     // Primitive type: triangle list
+                                            NULL,                   // Base vertex index (not needed for indexed drawing)
+                                            NULL,                   // Min index (used for internal calculations, NULL for auto)
+                                            CUBE_VERTEX_COUNT,      // Total number of vertices to consider from the vertex buffer
+                                            NULL,                   // Start index in the index buffer (NULL defaults to zero)
+                                            CUBE_TRIANGLES_COUNT ); // Number of triangles to draw
 }
 ///////////////////////////////////////////////////////////////
 void ClearResources()
 {
-    if (g_pixelShader)
-    {
-        std::cout << "Releasing pixel shader \n";
-        g_pixelShader->Release();
-        g_pixelShader = nullptr;
-    }
-
-    if (g_vertexShader)
+    if (g_VertexShader)
     {
         std::cout << "Releasing vertex shader \n";
-        g_vertexShader->Release();
-        g_vertexShader = nullptr;
+        SAFE_RELEASE(g_VertexShader);
     }
 
-    if (g_IndexBuffer)
+    if (g_PixelShader)
     {
-        std::cout << "Releasing index buffer \n";
-        g_IndexBuffer->Release();
-        g_IndexBuffer = nullptr;
-    }
-
-    if (g_VertexBuffer)
-    {
-        std::cout << "Releasing vertex buffer \n";
-        g_VertexBuffer->Release();
-        g_VertexBuffer = nullptr;
+        std::cout << "Releasing pixel shader \n";
+        SAFE_RELEASE(g_PixelShader);
     }
 
     if (g_Texture)
     {
         std::cout << "Releasing texture \n";
-        g_Texture->Release();
-        g_Texture = nullptr;
+        SAFE_RELEASE(g_Texture);
     }
 
-    if (pMesh)
+    if (g_IndexBuffer)
     {
-        std::cout << "Releasing mesh \n";
-        pMesh->Release();
-        pMesh = nullptr;
+        std::cout << "Releasing index buffer \n";
+        SAFE_RELEASE(g_IndexBuffer);
+    }
+
+    if (g_VertexBuffer)
+    {
+        std::cout << "Releasing vertex buffer \n";
+        SAFE_RELEASE(g_VertexBuffer);
     }
 
     if (g_Direct3DDevice)
     {
         std::cout << "Releasing Direct3D Device \n";
-        g_Direct3DDevice->Release();
-        g_Direct3DDevice = nullptr;
+        SAFE_RELEASE(g_Direct3DDevice);
     }
 
     if (g_Direct3D)
     {
         std::cout << "Releasing Direct3D \n";
-        g_Direct3D->Release();
-        g_Direct3D = nullptr;
+        SAFE_RELEASE(g_Direct3D);
     }
 }
 ///////////////////////////////////////////////////////////////
 // Entry point of the application
 INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 {
-    // Result value for handle function execution result
-    HRESULT result = E_FAIL;
-
     // Create log window for debug messages
     CreateLogWindow();
 
@@ -743,10 +699,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     // Creating texture for our model
     LoadTextures();
 
-    // Create and compile vertex + pixel shaders pair
-    //CompileShaders();
-
-    //Sleep(10000);
+    // Compile shaders
+    CompileShaders();
 
     // Create and fill vertex and index buffer
     CreateGeometry();
@@ -776,12 +730,11 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // Draw our indexed cube primitive and set textures and render states
         DrawGeometry();
 
-        // Set shaders to processing rendering pass
-        //g_Direct3DDevice->SetVertexShader(g_vertexShader);
-        //g_Direct3DDevice->SetPixelShader(g_pixelShader);
-
         // End the scene
         g_Direct3DDevice->EndScene();
+
+        // Result value for handle function execution result
+        HRESULT result = E_FAIL;
 
         // Present frame to screen
         result = g_Direct3DDevice->Present(NULL, NULL, NULL, NULL);
@@ -797,7 +750,6 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         if (g_bNeedResizeWindow)
         {
             ResizeWindow();
-
             g_bNeedResizeWindow = false;
         }
 
@@ -805,9 +757,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         if (g_bNeedReset)
         {
             std::cout << "Resetting Direct3D Device \n";
-
             ResetDirect3D();
-
             g_bNeedReset = false;
         }
     }
