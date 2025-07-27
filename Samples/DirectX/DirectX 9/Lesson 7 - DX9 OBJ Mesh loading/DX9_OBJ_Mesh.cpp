@@ -399,7 +399,6 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
     // Print( message into our log console
     Print("Starting application");
-    Print("\n");
 
     // Create main window
     CreateMainWindow(hInstance);

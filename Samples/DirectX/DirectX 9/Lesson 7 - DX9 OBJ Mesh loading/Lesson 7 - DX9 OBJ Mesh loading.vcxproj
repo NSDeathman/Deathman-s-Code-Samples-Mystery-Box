@@ -130,7 +130,9 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\uv_cheker.bmp" "$(OutDir)uv_cheker.bmp"
+      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\dingus_nowhiskers.dds" "$(OutDir)dingus_nowhiskers.dds"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.mtl" "$(OutDir)mesh.mtl"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.obj" "$(OutDir)mesh.obj"
 copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(OutDir)shader.txt"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -150,7 +152,9 @@ copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(O
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\uv_cheker.bmp" "$(OutDir)uv_cheker.bmp"
+      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\dingus_nowhiskers.dds" "$(OutDir)dingus_nowhiskers.dds"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.mtl" "$(OutDir)mesh.mtl"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.obj" "$(OutDir)mesh.obj"
 copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(OutDir)shader.txt"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -166,7 +170,9 @@ copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(O
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\uv_cheker.bmp" "$(OutDir)uv_cheker.bmp"
+      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\dingus_nowhiskers.dds" "$(OutDir)dingus_nowhiskers.dds"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.mtl" "$(OutDir)mesh.mtl"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.obj" "$(OutDir)mesh.obj"
 copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(OutDir)shader.txt"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -186,7 +192,9 @@ copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(O
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\uv_cheker.bmp" "$(OutDir)uv_cheker.bmp"
+      <Command>copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\dingus_nowhiskers.dds" "$(OutDir)dingus_nowhiskers.dds"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.mtl" "$(OutDir)mesh.mtl"
+copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\mesh.obj" "$(OutDir)mesh.obj"
 copy /Y "$(SolutionDir)\Samples\DirectX\DirectX 9\$(TargetName)\shader.txt" "$(OutDir)shader.txt"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

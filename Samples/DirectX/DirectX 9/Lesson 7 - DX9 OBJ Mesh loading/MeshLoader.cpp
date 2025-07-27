@@ -64,6 +64,7 @@ void CMeshLoader::Destroy()
 //--------------------------------------------------------------------------------------
 HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePath, const CHAR* strFilename)
 {
+	Print("\n");
 	Print("Creating mesh from OBJ file with name: %s", strFilename);
 
 	HRESULT hr;
@@ -78,6 +79,7 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 	// Load the vertex buffer, index buffer, and subset information from a file. In this case,
 	// an .obj file was chosen for simplicity, but it's meant to illustrate that ID3DXMesh objects
 	// can be filled from any mesh file format once the necessary data is extracted from file.
+	Print("Reading mesh data from file");
 	hr = LoadGeometryFromOBJ(strFilePath, strFilename);
 
 	ASSERT(SUCCEEDED(hr), "Can't load geometry from OBJ: %s", strFilePath + strFilename);
@@ -88,6 +90,7 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 	SetCurrentDirectory(m_strMediaDir);
 
 	// Load material textures
+	Print("Loading material textures");
 	for (int iMaterial = 0; iMaterial < m_Materials.GetSize(); iMaterial++)
 	{
 		Material* pMaterial = m_Materials.GetAt(iMaterial);
@@ -118,6 +121,8 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 
 	// Restore the original current directory
 	SetCurrentDirectory(strOldDir);
+
+	Print("Creating mesh from readed data");
 
 	// Create the encapsulated mesh
 	ID3DXMesh* pMesh = NULL;
@@ -170,6 +175,13 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 	SAFE_DELETE_ARRAY(aAdjacency);
 
 	m_pMesh = pMesh;
+
+	Print("Mesh successfully created!");
+	Print("Mesh statistic:");
+	Print("Vertices count: %d", m_pMesh->GetNumVertices());
+	Print("Faces count: %d", m_pMesh->GetNumFaces());
+	Print("Materials count: %d", m_Materials.GetSize());
+	Print("\n");
 
 	return S_OK;
 }
