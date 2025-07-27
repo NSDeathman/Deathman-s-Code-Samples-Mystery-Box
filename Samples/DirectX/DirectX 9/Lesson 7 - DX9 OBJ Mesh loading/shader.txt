@@ -13,7 +13,6 @@ struct VertexInput
 {
     float3 Position : POSITION; // Vertex position in object space
     float3 Normal : NORMAL;     // Vertex normal vector in object space
-    float3 Color : COLOR0;      // Vertex color (often used for per-vertex coloring)
     float2 UV : TEXCOORD0;      // Texture coordinates for sampling the texture
 };
 
@@ -23,7 +22,6 @@ struct Interpolators
     float4 HomogeniousPosition : POSITION; // Transformed position in homogeneous coordinates for rasterization
     float3 Position : TEXCOORD0;           // Position in view space for lighting calculations
     float3 Normal : TEXCOORD1;             // Normal in view space for lighting calculations
-    float3 Color : TEXCOORD2;              // Color passed to the pixel shader
     float2 UV : TEXCOORD3;                 // Texture coordinates passed to the pixel shader
 };
 
@@ -41,8 +39,7 @@ Interpolators VSMain(VertexInput Input)
     // Transform the normal vector to view space; note that the last parameter set to 0.0f indicates a direction vector
     Output.Normal = mul(float4(Input.Normal, 0.0f), matWorldView).xyz;
 
-    // Pass through the color and UV coordinates directly
-    Output.Color = Input.Color;
+    // Pass through the UV coordinates directly
     Output.UV = Input.UV;
 
     return Output; // Return the interpolated data for use in the pixel shader

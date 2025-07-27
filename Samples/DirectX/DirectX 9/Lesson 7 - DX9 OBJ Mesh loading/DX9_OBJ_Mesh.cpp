@@ -371,6 +371,8 @@ void DrawGeometry()
         {
             Material* pMaterial = g_MeshLoader.GetMaterial(iSubset);
 
+            // Setup our texture. Bind the texture resource to the shader's texture register (S0).
+            // This allows the pixel shader to access and use this texture when rendering the geometry.
             g_Direct3DDevice->SetTexture(0, pMaterial->pTextureAlbedo);
 
             pMesh->DrawSubset(iSubset);
