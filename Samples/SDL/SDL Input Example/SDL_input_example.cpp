@@ -46,6 +46,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
     // Create an SDL window
     g_Window = SDL_CreateWindow("SDL2 Sample", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 300, 300, SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
+
     if (g_Window == nullptr) 
     {
         std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << "\n";
@@ -55,6 +56,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
     // Create a rendering context
     g_Renderer = SDL_CreateRenderer(g_Window, -1, SDL_RENDERER_PRESENTVSYNC);
+
     if (g_Renderer == nullptr) 
     {
         std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << "\n";
@@ -78,14 +80,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // Handle events
         while (SDL_PollEvent(&Event)) 
         {
-            if (Event.type == SDL_QUIT) 
-            {
+            if (Event.type == SDL_QUIT)
                 running = false;
-            }
         }
 
         // Update input every frame
         Input->OnFrame(Event);
+
+        Input->SetNeedUpdateCursorWithGameController(true);
 
         Input->HandleCursorWithGameController();
 
