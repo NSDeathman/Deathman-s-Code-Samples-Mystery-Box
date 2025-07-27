@@ -32,6 +32,9 @@ HWND g_Window = nullptr;
 bool g_bDeviceLost = false;
 bool g_bNeedReset = false;
 
+int g_ScreenHeight = 1024;
+int g_ScreenWidth = 1024;
+
 int g_ResizeHeight = 0;
 int g_ResizeWidth = 0;
 ///////////////////////////////////////////////////////////////
@@ -114,10 +117,13 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         window_class_name,          // Window class
         window_name,                // Window text
         WS_OVERLAPPEDWINDOW,        // Window style
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, // Size and position
+        CW_USEDEFAULT,              // Position X
+        CW_USEDEFAULT,              // Position Y
+        g_ScreenHeight,             // Size X
+        g_ScreenWidth,              // Size Y
         NULL,                       // Parent window
         NULL,                       // Menu
-        hInstance,                  // Instance handle
+        WindClass.hInstance,        // Instance handle
         NULL                        // Additional application data
     );
 
@@ -267,8 +273,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // Handle window resize (we don't resize directly in the WM_SIZE handler)
         if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
         {
-            Direct3DPresentationParams.BackBufferWidth = g_ResizeWidth;
-            Direct3DPresentationParams.BackBufferHeight = g_ResizeHeight;
+            Direct3DPresentationParams.BackBufferWidth = g_ScreenWidth = g_ResizeWidth;
+            Direct3DPresentationParams.BackBufferHeight = g_ScreenHeight = g_ResizeHeight;
             g_ResizeWidth = g_ResizeHeight = 0;
             g_bNeedReset = true;
         }

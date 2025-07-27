@@ -82,7 +82,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\DX9_Tutorial\Lesson-2-Device-Reset\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -90,7 +90,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\DX9_Tutorial\Lesson-2-Device-Reset\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -98,7 +98,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\DX9_Tutorial\Lesson-2-Device-Reset\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -106,7 +106,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\DX9_Tutorial\Lesson-2-Device-Reset\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

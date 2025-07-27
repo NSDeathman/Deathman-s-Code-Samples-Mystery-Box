@@ -100,6 +100,12 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         if (Input->GamepadButtonPressed(SDL_CONTROLLER_BUTTON_B))
             std::cout << "Gamepad B button pressed \n";
 
+        if (Input->KeyPressed(SDL_SCANCODE_ESCAPE))
+        {
+            std::cout << "Escape key pressed - closing application \n";
+            running = false;
+        }
+
         // Get left stick angle value in interval {-1; 1}
         float LeftStickX, LeftStickY = NULL;
         Input->GamepadGetLeftStick(LeftStickX, LeftStickY);

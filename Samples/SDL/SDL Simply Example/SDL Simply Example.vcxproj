@@ -175,7 +175,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\;$(SolutionDir)\Third-Party\Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\SDL_Tutorial\SDL_Simply_Render\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -183,7 +183,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\;$(SolutionDir)\Third-Party\Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\SDL_Tutorial\SDL_Simply_Render\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -191,7 +191,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\;$(SolutionDir)\Third-Party\Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\SDL_Tutorial\SDL_Simply_Render\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -199,7 +199,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include\;$(SolutionDir)\Third-Party\Include\</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\$(LibrariesArchitecture)\;$(SolutionDir)\Third-Party\Libraries\$(LibrariesArchitecture)\;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
-    <OutDir>$(SolutionDir)\build\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\bin\$(Platform)\SDL_Tutorial\SDL_Simply_Render\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Platform)\$(TargetName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -202,9 +202,11 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_SIZE:
         if (wParam == SIZE_MINIMIZED)
             return 0;
+
         g_bNeedResizeWindow = true;
         g_ScreenResizeWidth = (UINT)LOWORD(lParam); // Queue resize
         g_ScreenResizeHeight = (UINT)HIWORD(lParam);
+
         return 0;
     }
 
@@ -234,76 +236,85 @@ void CreateLogWindow()
 void CreateMainWindow(HINSTANCE hInstance)
 {
     // Register the window class 
-    // (For correct work turn off worldwide and unicode symbols using 
-    // in VS project settings)
-    LPCSTR window_class_name = (LPCSTR)"DirectXSampleWindowClass";
-    LPCSTR window_name = (LPCSTR)"DirectX 9 Sample";
+    // (Ensure to configure project settings correctly to avoid issues with 
+    // worldwide and Unicode symbols in Visual Studio)
+    LPCSTR window_class_name = (LPCSTR)"DirectXSampleWindowClass"; // Define a name for the window class.
+    LPCSTR window_name = (LPCSTR)"DirectX 9 Sample";               // Define a title for the window.
 
-    WNDCLASS WindClass = {};
-    WindClass.lpfnWndProc = WindowProcedure;           // Set the window procedure
-    WindClass.hInstance = hInstance;                   // Handle to the application instance
-    WindClass.lpszClassName = window_class_name;       // Name of the window class
-    WindClass.hCursor = LoadCursor(NULL, IDC_ARROW);   // Default cursor
+    // Initialize a WNDCLASS structure to define the window
+    WNDCLASS WindClass = {}; // Use default initialization to zero out the struct.
+    WindClass.lpfnWndProc = WindowProcedure;         // Specify the function to handle window messages.
+    WindClass.hInstance = hInstance;                 // Store the application instance handle.
+    WindClass.lpszClassName = window_class_name;     // Set the name of the window class.
+    WindClass.hCursor = LoadCursor(NULL, IDC_ARROW); // Load the default arrow cursor.
 
-    // Register the window class
-    std::cout << "Window class registering \n";
-    RegisterClass(&WindClass);
+    // Register the window class with the operating system
+    std::cout << "Window class registering \n";       // Output message indicating registration process.
+    RegisterClass(&WindClass);                        // Call Windows API to register the defined window class.
 
-    // Create the window
-    g_Window = CreateWindowEx( NULL,                       // Optional window styles
-                               window_class_name,          // Window class
-                               window_name,                // Window text
-                               WS_OVERLAPPEDWINDOW,        // Window style
-                               CW_USEDEFAULT,              // Position X
-                               CW_USEDEFAULT,              // Position Y
-                               g_ScreenHeight,             // Size X
-                               g_ScreenWidth,              // Size Y
-                               NULL,                       // Parent window
-                               NULL,                       // Menu
-                               WindClass.hInstance,        // Instance handle
-                               NULL );                     // Additional application data
+    // Create the main application window
+    g_Window = CreateWindowEx(
+        NULL,                                          // Optional window styles (default)
+        window_class_name,                             // Name of the registered window class
+        window_name,                                   // Title text displayed in the window
+        WS_OVERLAPPEDWINDOW,                           // Window style (overlapped window with borders)
+        CW_USEDEFAULT,                                 // Default x position on screen
+        CW_USEDEFAULT,                                 // Default y position on screen
+        g_ScreenHeight,                                // Width of the window
+        g_ScreenWidth,                                 // Height of the window
+        NULL,                                          // Handle to parent window (no parent)
+        NULL,                                          // Handle to menu (no menu)
+        WindClass.hInstance,                           // Instance handle from the registered class
+        NULL);                                         // Additional application data (none)
 
+    // Check if the window was created successfully
     if (g_Window == NULL)
     {
-        // If the window creation failed, exit
+        // If the window creation failed, show an error message and set a flag to close the application
         MessageBox(NULL, "Error in window creating procedure", "DX9 Sample.exe", MB_OK);
-        g_bNeedCloseApplication = true;
+        g_bNeedCloseApplication = true; // Flag to signal that the application should close.
     }
 
-    std::cout << "Window created successfully \n";
+    std::cout << "Window created successfully \n"; // Output message indicating successful window creation.
 
-    // Show the window 
-    // (You need turn subsystem to Windows (/SUBSYSTEM:WINDOWS) 
-    // in VS project settings for this)
-    ShowWindow(g_Window, SW_SHOW);
+    // Show the newly created window
+    // (Make sure to set the subsystem to Windows (/SUBSYSTEM:WINDOWS) in Visual Studio project settings)
+    ShowWindow(g_Window, SW_SHOW); // Display the window with the specified command to show it.
 }
 ///////////////////////////////////////////////////////////////
 void CreateDirect3D()
 {
-    std::cout << "Creating Direct3D 9 \n";
-    g_Direct3D = Direct3DCreate9(D3D_SDK_VERSION);
+    std::cout << "Creating Direct3D 9 \n"; // Output a message indicating that Direct3D 9 is being created.
+    
+    // Initialize Direct3D COM object
+    g_Direct3D = Direct3DCreate9(D3D_SDK_VERSION); // Create a Direct3D object based on the SDK version specified.
 
+    // Zero out the structure to ensure all fields are initialized to zero
     ZeroMemory(&g_Direct3DPresentationParams, sizeof(g_Direct3DPresentationParams));
-    g_Direct3DPresentationParams.Windowed = TRUE;
-    g_Direct3DPresentationParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    g_Direct3DPresentationParams.BackBufferFormat = D3DFMT_X8R8G8B8;
-    g_Direct3DPresentationParams.EnableAutoDepthStencil = TRUE;
-    g_Direct3DPresentationParams.AutoDepthStencilFormat = D3DFMT_D24X8;
+    
+    // Set presentation parameters for the Direct3D device
+    g_Direct3DPresentationParams.Windowed = TRUE; // Run in windowed mode (not fullscreen).
+    g_Direct3DPresentationParams.SwapEffect = D3DSWAPEFFECT_DISCARD; // Indicates how to handle buffers when presenting.
+    g_Direct3DPresentationParams.BackBufferFormat = D3DFMT_X8R8G8B8; // Set the back buffer format to 32-bit RGB (with no alpha).
+    g_Direct3DPresentationParams.EnableAutoDepthStencil = TRUE; // Enable automatic depth buffering.
+    g_Direct3DPresentationParams.AutoDepthStencilFormat = D3DFMT_D24X8; // Set the depth buffer format to a 24-bit depth and 8 bits for stencil.
 
-    // Result value for handle function execution result
-    HRESULT result = E_FAIL;
+    // Result value for handling function execution result
+    HRESULT result = E_FAIL; // Initialize 'result' to E_FAIL which indicates failure by default.
 
-    // Create the device
-    std::cout << "Creating Direct3D 9 Device \n";
-    result = g_Direct3D->CreateDevice( D3DADAPTER_DEFAULT,
-                                       D3DDEVTYPE_HAL,
-                                       g_Window, // Pass the window handle here
-                                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
-                                       &g_Direct3DPresentationParams,
-                                       &g_Direct3DDevice );
+    // Create the Direct3D device
+    std::cout << "Creating Direct3D 9 Device \n"; // Output a message indicating that the Direct3D device is being created.
+    
+    // Call CreateDevice to create a new Direct3D device
+    result = g_Direct3D->CreateDevice( D3DADAPTER_DEFAULT,                  // Use the default adapter (usually the primary display).
+                                       D3DDEVTYPE_HAL,                      // Use HAL (Hardware Abstraction Layer) device.
+                                       g_Window,                            // Pass the window handle where the device will render.
+                                       D3DCREATE_HARDWARE_VERTEXPROCESSING, // Specify hardware vertex processing for better performance.
+                                       &g_Direct3DPresentationParams,       // Provide the previously configured presentation parameters.
+                                       &g_Direct3DDevice );                 // Output the created device to this variable.
 
-    // Handle device creation failure (add your error handling here)
-    Assert(FAILED(result), "Error in Direct3D 9 Device creating procedure");
+    // Handle device creation failure
+    Assert(FAILED(result), "Error in Direct3D 9 Device creating procedure"); // Assert if device creation failed, outputting an error message.
 }
 ///////////////////////////////////////////////////////////////
 void LoadTextures()
@@ -320,65 +331,75 @@ void LoadTextures()
 void CompileShaders()
 {
     // Result value for handle function execution result
-    HRESULT result = E_FAIL;
+    HRESULT result = E_FAIL; // Initialize 'result' to E_FAIL, indicative of failure.
 
-    ID3DXBuffer* ErrorBuffer = NULL;
+    ID3DXBuffer* ErrorBuffer = NULL; // Buffer to hold any compilation errors.
 
     // Vertex shader
-    ID3DXBuffer* VertexShaderBuffer = NULL;
-    std::string ObjectShaderPath = (std::string)"shader.txt";
-    std::cout << "Compiling vertex shader \n";
-    result = D3DXCompileShaderFromFile( ObjectShaderPath.c_str(),
-                                        nullptr,
-                                        nullptr,
-                                        "VSMain",
-                                        "vs_3_0",
-                                        NULL,
-                                        &VertexShaderBuffer,
-                                        &ErrorBuffer,
-                                        &g_VertexShaderConstantTable );
+    ID3DXBuffer* VertexShaderBuffer = NULL; // Buffer to hold compiled vertex shader.
+    std::string ShaderFilePath = (std::string)"shader.txt"; // Path to the shader source file.
+    std::cout << "Compiling vertex shader \n"; // Output message indicating the start of vertex shader compilation.
+    
+    // Compile the vertex shader from file
+    result = D3DXCompileShaderFromFile( ShaderFilePath.c_str(),         // Path to the shader source
+                                        nullptr,                        // No defines needed
+                                        nullptr,                        // No include handler needed
+                                        "VSMain",                       // Entry point for the vertex shader
+                                        "vs_3_0",                       // Shader model (version)
+                                        NULL,                           // No flags specified
+                                        &VertexShaderBuffer,            // Output buffer for compiled shader
+                                        &ErrorBuffer,                   // Output buffer for any errors
+                                        &g_VertexShaderConstantTable ); // Constant table for the vertex shader
 
+    // Check for compilation errors in the vertex shader
     if (ErrorBuffer)
     {
-        std::cout << "Vertex shader error \n";
-        std::cout << (char*)ErrorBuffer->GetBufferPointer();
-        std::cout << "\n";
+        std::cout << "Vertex shader error \n"; // Indicate an error occurred during compilation.
+        std::cout << (char*)ErrorBuffer->GetBufferPointer(); // Output the error message.
+        std::cout << "\n"; // New line for better readability.
     }
 
+    // If the compilation failed, handle the error
     if (FAILED(result))
     {
-        MakeErrorMessage((char*)ErrorBuffer->GetBufferPointer());
-        ErrorBuffer->Release();
+        MakeErrorMessage((char*)ErrorBuffer->GetBufferPointer()); // Show a detailed error message.
+        ErrorBuffer->Release(); // Release the error buffer to avoid memory leaks.
     }
 
+    // Create the vertex shader object from the compiled buffer
     g_Direct3DDevice->CreateVertexShader((DWORD*)VertexShaderBuffer->GetBufferPointer(), &g_VertexShader);
 
     // Pixel shader
-    ID3DXBuffer* PixelShaderBuffer = NULL;
-    std::cout << "Compiling pixel shader \n";
-    result = D3DXCompileShaderFromFile( ObjectShaderPath.c_str(),
-                                        nullptr,
-                                        nullptr,
-                                        "PSMain",
-                                        "ps_3_0",
-                                        NULL,
-                                        &PixelShaderBuffer,
-                                        &ErrorBuffer,
-                                        &g_PixelShaderConstantTable );
+    ID3DXBuffer* PixelShaderBuffer = NULL; // Buffer to hold compiled pixel shader.
+    std::cout << "Compiling pixel shader \n"; // Output message indicating the start of pixel shader compilation.
+    
+    // Compile the pixel shader from file
+    result = D3DXCompileShaderFromFile( ShaderFilePath.c_str(),         // Path to the same shader source
+                                        nullptr,                        // No defines needed
+                                        nullptr,                        // No include handler needed
+                                        "PSMain",                       // Entry point for the pixel shader
+                                        "ps_3_0",                       // Shader model (version)
+                                        NULL,                           // No flags specified
+                                        &PixelShaderBuffer,             // Output buffer for compiled shader
+                                        &ErrorBuffer,                   // Output buffer for any errors
+                                        &g_PixelShaderConstantTable );  // Constant table for the pixel shader
 
+    // Check for compilation errors in the pixel shader
     if (ErrorBuffer)
     {
-        std::cout << "Pixel shader error \n";
-        std::cout << (char*)ErrorBuffer->GetBufferPointer();
-        std::cout << "\n";
+        std::cout << "Pixel shader error \n"; // Indicate an error occurred during compilation.
+        std::cout << (char*)ErrorBuffer->GetBufferPointer(); // Output the error message.
+        std::cout << "\n"; // New line for better readability.
     }
 
+    // If the compilation failed, handle the error
     if (FAILED(result))
     {
-        MakeErrorMessage((char*)ErrorBuffer->GetBufferPointer());
-        ErrorBuffer->Release();
+        MakeErrorMessage((char*)ErrorBuffer->GetBufferPointer()); // Show a detailed error message.
+        ErrorBuffer->Release(); // Release the error buffer to avoid memory leaks.
     }
 
+    // Create the pixel shader object from the compiled buffer
     g_Direct3DDevice->CreatePixelShader((DWORD*)PixelShaderBuffer->GetBufferPointer(), &g_PixelShader);
 }
 ///////////////////////////////////////////////////////////////
@@ -398,19 +419,21 @@ void CreateGeometry()
     UINT VertexBufferSize = (UINT)VertexDataSize * VertecesCount; // Total size required for the vertex buffer
 
     // Create the vertex buffer in managed memory pool with specified parameters
-    g_Direct3DDevice->CreateVertexBuffer(VertexBufferSize, // Size of the vertex buffer
+    g_Direct3DDevice->CreateVertexBuffer( VertexBufferSize, // Size of the vertex buffer
                                           NULL,             // Usage flag (default)
                                           VERTEXFVF,        // Flexible Vertex Format (defines the layout of the vertex data)
                                           D3DPOOL_MANAGED,  // Memory pool type (managed by Direct3D)
                                           &g_VertexBuffer,  // Pointer to the created vertex buffer
-                                          NULL);            // Handle to the resource (not needed here)
+                                          NULL );           // Handle to the resource (not needed here)
 
     // Result variable to check success/failure of operations
     HRESULT result = E_FAIL;
 
     // Fill the vertex buffer with data
     VERTEX_DATA* VerticesData; // Pointer to hold vertex data during locking
+
     std::cout << "Locking vertex buffer \n"; // Indicating that we're about to fill the buffer
+
     // Lock the vertex buffer to gain access to write data into it
     result = g_VertexBuffer->Lock(NULL, sizeof(VerticesData), (void**)&VerticesData, NULL);
 
@@ -575,12 +598,11 @@ void UpdateTransformMatrices()
     g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matProjection", &matProjection);
 
     //-- WorldView Matrix --//
-    // The WorldView Matrix combines the Worldand View matrices.
+    // The WorldView Matrix combines the World and View matrices.
     // It transforms coordinates from object space to view space.
     // This matrix is formed by multiplying the World matrix by the View matrix :
     D3DXMATRIX matWorldView;
     matWorldView = matWorld * matView;
-    D3DXMATRIX matWorldViewTransposed;
     g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldView", &matWorldView);
 
     //-- WorldViewProjection Matrix --//
@@ -588,7 +610,6 @@ void UpdateTransformMatrices()
     // It transforms coordinates from object space directly to clip space in a single operation :
     D3DXMATRIX matWorldViewProjection;
     matWorldViewProjection = matWorld * matView * matProjection;
-    D3DXMATRIX matWorldViewProjectionTransposed;
     g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldViewProjection", &matWorldViewProjection);
 }
 ///////////////////////////////////////////////////////////////
