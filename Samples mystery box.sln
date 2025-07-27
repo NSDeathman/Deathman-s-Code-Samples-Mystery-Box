@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL Input Example", "Sample
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 6 - DX9 Shaders", "Samples\DirectX\DirectX 9\Lesson 6 - DX9 Shaders\Lesson 6 - DX9 Shaders.vcxproj", "{94FACB73-D971-4A97-ABAD-32B2DD6C9F69}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 7 - DX9 OBJ Mesh loading", "Samples\DirectX\DirectX 9\Lesson 7 - DX9 OBJ Mesh loading\Lesson 7 - DX9 OBJ Mesh loading.vcxproj", "{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -119,6 +121,14 @@ Global
 		{94FACB73-D971-4A97-ABAD-32B2DD6C9F69}.Release|x64.Build.0 = Release|x64
 		{94FACB73-D971-4A97-ABAD-32B2DD6C9F69}.Release|x86.ActiveCfg = Release|Win32
 		{94FACB73-D971-4A97-ABAD-32B2DD6C9F69}.Release|x86.Build.0 = Release|Win32
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Debug|x64.ActiveCfg = Debug|x64
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Debug|x64.Build.0 = Debug|x64
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Debug|x86.ActiveCfg = Debug|Win32
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Debug|x86.Build.0 = Debug|Win32
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Release|x64.ActiveCfg = Release|x64
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Release|x64.Build.0 = Release|x64
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Release|x86.ActiveCfg = Release|Win32
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,6 +146,7 @@ Global
 		{FF507BB6-1F99-4B20-B281-6437F57CD6D2} = {7D6C7252-0E56-4EA2-89EE-28C90D10AC91}
 		{37B04347-43D3-4D18-A863-29F9D84BB51F} = {7D6C7252-0E56-4EA2-89EE-28C90D10AC91}
 		{94FACB73-D971-4A97-ABAD-32B2DD6C9F69} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
+		{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3} = {5221D268-5367-4B31-B3D2-697ECAE80E12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A4B16603-B6CA-4EDD-BB60-F28DE6BD46CB}
