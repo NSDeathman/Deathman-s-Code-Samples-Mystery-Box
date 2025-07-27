@@ -19,7 +19,7 @@ CInput::CInput()
 	if(SDL_NumJoysticks())
 		m_GameController = SDL_GameControllerOpen(0);
 
-	m_bNeedHandleCursorWithGameController = false;
+	m_bNeedHandleCursorWithGameController = true;
 
 	GetCursorPos(&m_ptLastCursorPosition);
 }

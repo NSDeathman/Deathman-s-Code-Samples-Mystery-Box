@@ -87,6 +87,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         // Update input every frame
         Input->OnFrame(Event);
 
+        Input->HandleCursorWithGameController();
+
         // Demo prints
         if(Input->KeyHolded(SDL_SCANCODE_W))
             std::cout << "W key holded \n";
@@ -112,7 +114,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
         if (LeftStickX != NULL || LeftStickY != NULL)
         {
-            std::cout << "Gamepad left stick X " << LeftStickX << "Y " << LeftStickY;
+            std::cout << "Gamepad left stick X " << LeftStickX << " Y " << LeftStickY;
             std::cout << "\n";
         }
 
@@ -122,7 +124,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
         if (RightStickX != NULL || RightStickY != NULL)
         {
-            std::cout << "Gamepad right stick X " << RightStickX << "Y " << RightStickY;
+            std::cout << "Gamepad right stick X " << RightStickX << " Y " << RightStickY;
             std::cout << "\n";
         }
 
