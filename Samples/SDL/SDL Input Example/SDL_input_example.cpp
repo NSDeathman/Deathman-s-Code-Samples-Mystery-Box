@@ -67,6 +67,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
     // Initialize our input class
     Input = new CInput;
 
+    Input->SetNeedUpdateCursorWithGameController(true);
+
     //-------------------EVENT LOOP CREATING CODE-------------------//
     // Event loop
     std::cout << "\n";
@@ -85,10 +87,6 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
         // Update input every frame
         Input->OnFrame(Event);
-
-        Input->SetNeedUpdateCursorWithGameController(true);
-
-        Input->HandleCursorWithGameController();
 
         // Demo prints
         if(Input->KeyHolded(SDL_SCANCODE_W))
