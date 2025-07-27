@@ -13,7 +13,6 @@
 // Global variables
 SDL_Window* g_Window = nullptr;
 SDL_Renderer* g_Renderer = nullptr;
-CInput* Input = nullptr;
 ///////////////////////////////////////////////////////////////
 // Entry point of the application
 INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT) 
