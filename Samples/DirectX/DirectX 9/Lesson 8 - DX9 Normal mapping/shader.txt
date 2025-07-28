@@ -1,0 +1,138 @@
+///////////////////////////////////////////////////////////////
+// Matrix uniforms for transformation and projection
+uniform float4x4 matWorld;                  // World matrix: transforms object space to world space
+uniform float4x4 matView;                   // View matrix: transforms world space to camera/view space
+uniform float4x4 matProjection;             // Projection matrix: transforms view space to clip space
+uniform float4x4 matWorldView;              // Combined world and view matrix
+uniform float4x4 matWorldViewProjection;    // Combined world, view, and projection matrix
+///////////////////////////////////////////////////////////////
+// Texture sampler for the albedo (color) texture
+uniform sampler2D smpAlbedo : register(s0); // Sampler for accessing the albedo texture, bound to register s0
+
+// Texture sampler for the bump (height map) texture
+uniform sampler2D smpBump : register(s1); // Sampler for accessing the bump texture, bound to register s1
+///////////////////////////////////////////////////////////////
+uniform float4 LightPosition;
+///////////////////////////////////////////////////////////////
+float3 sRgbToLinear(float3 vValue)
+{
+    return vValue * (vValue * (vValue * 0.305306011 + 0.682171111) + 0.012522878);
+}
+
+float3 LinearTosRgb(float3 vColor)
+{
+    float3 S1 = sqrt(vColor);
+    float3 S2 = sqrt(S1);
+    float3 S3 = sqrt(S2);
+    return (0.585122381 * S1 + 0.783140355 * S2 - 0.368262736 * S3);
+}
+///////////////////////////////////////////////////////////////
+// Input structure for vertex shader
+struct VertexInput
+{
+    float3 Position : POSITION; // Vertex position in object space
+    float3 Tangent : TANGENT;
+    float3 Normal : NORMAL;     // Vertex normal vector in object space
+    float2 UV : TEXCOORD0;      // Texture coordinates for sampling the texture
+};
+
+// Output structure for interpolated data sent to the pixel shader
+struct Interpolators
+{
+    float4 HomogeniousPosition : POSITION; // Transformed position in homogeneous coordinates for rasterization
+    float3 Position : TEXCOORD0;           // Position in view space for lighting calculations
+    float3 TBN0 : TEXCOORD1;
+    float3 TBN1 : TEXCOORD2;
+    float3 TBN2 : TEXCOORD3;
+    float2 UV : TEXCOORD4;                 // Texture coordinates passed to the pixel shader
+};
+///////////////////////////////////////////////////////////////
+// Vertex shader main function
+///////////////////////////////////////////////////////////////
+// Vertex shader main function
+Interpolators VSMain(VertexInput Input)
+{
+    Interpolators Output; // Create an instance of the output structure to hold interpolated data for the pixel shader.
+
+    // Transform the vertex position by the combined World, View, and Projection matrix.
+    // This transforms the vertex from object space into clip space where it can be rendered.
+    Output.HomogeniousPosition = mul(float4(Input.Position, 1.0f), matWorldViewProjection);
+    
+    // Calculate the vertex position in view space.
+    // The result is stored as a 3D vector which will be used for further calculations, such as lighting.
+    Output.Position = mul(float4(Input.Position, 1.0f), matWorldView).xyz;
+
+    // Calculate the binormal (also known as bitangent) vector in the shader.
+    // The binormal is computed using the cross product of the Tangent and Normal vectors,
+    // providing a complete orthonormal basis for normal mapping.
+    float3 Binormal = cross(Input.Tangent, Input.Normal);
+
+    // Combine tangent (T), binormal (B), and normal (N) into a TBN matrix.
+    // This matrix is transformed from world space to view space for correct lighting calculations.
+    float3x3 TBN = mul((float3x3)matWorldView, float3x3( Input.Tangent.x, Binormal.x, Input.Normal.x,
+                                                         Input.Tangent.y, Binormal.y, Input.Normal.y,
+                                                         Input.Tangent.z, Binormal.z, Input.Normal.z ));
+
+    // Separate the TBN matrix into three float3 components and prepare them for sending to the pixel shader.
+    // These will be used for proper normal mapping calculations in the pixel shader.
+    Output.TBN0 = TBN[0]; // Tangent vector
+    Output.TBN1 = TBN[1]; // Binormal (Bitangent) vector
+    Output.TBN2 = TBN[2]; // Normal vector
+
+    // Pass through the UV coordinates directly from the input.
+    Output.UV = Input.UV;
+    Output.UV.y = -Input.UV.y;
+
+    return Output; // Return the interpolated data for use in the pixel shader.
+}
+
+// Pixel shader main function
+float4 PSMain(Interpolators Input) : COLOR0
+{
+    // Sample the albedo texture using the UV coordinates provided from the vertex shader.
+    // This retrieves the base color of the surface from the texture map.
+    float4 Albedo = tex2D(smpAlbedo, Input.UV);
+
+    // Apply gamma correction to the sampled color (assumed sRGB to linear conversion).
+    // This step adjusts the color value from a gamma-corrected space to linear space for accurate lighting calculations.
+    Albedo.rgb = sRgbToLinear(Albedo.rgb);
+
+    // Calculate the view direction vector by negating the normalized position vector in view space.
+    // The view direction is necessary for lighting calculations, particularly in advanced shading techniques.
+    float3 ViewDirection = -normalize(Input.Position);
+
+    // Calculate the light direction. 
+    // This is the direction from the surface point towards the light source, which is needed for diffuse lighting calculations.
+    float3 LightDirection = -normalize(Input.Position - LightPosition.xyz);
+
+    // Get normal map from bump texture.
+    float3 NormalMap = tex2D(smpBump, Input.UV).xyz;
+
+    // Remap values from [0;1] space to [-1;1] space
+    NormalMap = NormalMap * 2.0f + 1.0f;
+
+    // Make TBN matrix from separated components for transforming normals correctly.
+    // The TBN (Tangent, Binormal, Normal) matrix allows us to transform normal vectors from tangent space to world/view space.
+    float3x3 TBN = float3x3(Input.TBN0, Input.TBN1, Input.TBN2);
+
+    // Create bumpy normal by applying the normal map derived from height to get more detailed lighting.
+    float3 Normal = mul(TBN, NormalMap);
+    Normal = normalize(Normal); // Normalize the bumpy normal.
+
+    // Calculate main diffuse lighting using the bumpy normal.
+    // The dot product with the light direction calculates the diffuse intensity based on the angle of incidence.
+    float NdotL = max(dot(Normal, LightDirection), 0.0f);
+    
+    // Calculate the final color based on the texture color and all lighting contributions.
+    // Combine the Albedo color with the diffuse factors from both flat and bumpy normals.
+    float4 FinalColor = Albedo * NdotL;
+
+    // Apply gamma correction back to sRGB space for rendering.
+    // This converts the linear color value back to the gamma-corrected space suitable for display.
+    FinalColor.rgb = LinearTosRgb(FinalColor.rgb);
+
+    //FinalColor.rgb = NdotLByMappedNormal;
+
+    return FinalColor; // Return the final color which will be used as the fragment's output color.
+}
+///////////////////////////////////////////////////////////////
