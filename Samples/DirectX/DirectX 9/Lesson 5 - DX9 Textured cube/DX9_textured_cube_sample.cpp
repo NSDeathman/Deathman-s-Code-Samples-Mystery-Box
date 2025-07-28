@@ -521,6 +521,14 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         g_Direct3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
         g_Direct3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
+        // Set texture sampler states to control texture filtering behavior.
+        g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);   // Use anisotropic filtering for magnification.
+        g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);        // Use linear filtering for minification.
+        g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);        // Use linear filtering for mipmap levels.
+
+        // Set the maximum level of anisotropy for texture sampling.
+        g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
+
         // Set the vertex buffer to be active
         g_Direct3DDevice->SetStreamSource(0, g_VertexBuffer, 0, sizeof(VERTEX_DATA));
 

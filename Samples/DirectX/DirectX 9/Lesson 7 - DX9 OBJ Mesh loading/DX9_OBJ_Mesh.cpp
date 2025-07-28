@@ -339,13 +339,19 @@ void UpdateTransformMatrices()
     // This matrix is formed by multiplying the World matrix by the View matrix :
     D3DXMATRIX matWorldView;
     matWorldView = matWorld * matView;
-    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldView", &matWorldView);
+
+    // On the CPU, 2D arrays are generally stored in row-major ordering, so the order in memory goes x[0][0], x[0][1], ... 
+    // In HLSL, matrix declarations default to column-major ordering, so the order goes x[0][0], x[1][0], ...
+    // https://stackoverflow.com/questions/32037617/why-is-this-transpose-required-in-my-worldviewproj-matrix
+    D3DXMATRIX matWorldViewTransposed;
+    D3DXMatrixTranspose(&matWorldViewTransposed, &matWorldView);
+    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldView", &matWorldViewTransposed);
 
     //-- WorldViewProjection Matrix --//
     // The WorldViewProjection(WVP) Matrix is the combination of the World, View, and Projection matrices.
     // It transforms coordinates from object space directly to clip space in a single operation :
     D3DXMATRIX matWorldViewProjection;
-    matWorldViewProjection = matWorld * matView * matProjection;
+    matWorldViewProjection = matWorldView * matProjection;
     g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldViewProjection", &matWorldViewProjection);
 }
 ///////////////////////////////////////////////////////////////
@@ -374,6 +380,14 @@ void DrawGeometry()
             // Setup our texture. Bind the texture resource to the shader's texture register (S0).
             // This allows the pixel shader to access and use this texture when rendering the geometry.
             g_Direct3DDevice->SetTexture(0, pMaterial->pTextureAlbedo);
+
+            // Set texture sampler states to control texture filtering behavior.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); // Use anisotropic filtering for magnification.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); // Use linear filtering for minification.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); // Use linear filtering for mipmap levels.
+
+            // Set the maximum level of anisotropy for texture sampling.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
 
             pMesh->DrawSubset(iSubset);
         }

@@ -623,6 +623,14 @@ void DrawGeometry()
     // This allows the pixel shader to access and use this texture when rendering the geometry.
     g_Direct3DDevice->SetTexture(0, g_Texture); // Texture stage 0 (S0) is being set with the texture resource
 
+    // Set texture sampler states to control texture filtering behavior.
+    g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);   // Use anisotropic filtering for magnification.
+    g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);        // Use linear filtering for minification.
+    g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);        // Use linear filtering for mipmap levels.
+
+    // Set the maximum level of anisotropy for texture sampling.
+    g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
+
     // Set the vertex buffer as the active source for vertex data. 
     // The vertex buffer will be read starting at offset 0, and each vertex is of size sizeof(VERTEX_DATA).
     g_Direct3DDevice->SetStreamSource(0, g_VertexBuffer, 0, sizeof(VERTEX_DATA));

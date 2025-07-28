@@ -41,6 +41,7 @@ Interpolators VSMain(VertexInput Input)
 
     // Pass through the UV coordinates directly
     Output.UV = Input.UV;
+    Output.UV.y = -Input.UV.y;
 
     return Output; // Return the interpolated data for use in the pixel shader
 }
@@ -61,7 +62,7 @@ float4 PSMain(Interpolators Input) : COLOR0
     float3 Normal = normalize(Input.Normal);
 
     // Compute the dot product between the normal and view direction, giving the cosine of the angle between them
-    float NdotV = dot(Normal, ViewDirection);
+    float NdotV = max(dot(Normal, ViewDirection), 0.0001f);
 
     // Calculate the final color based on the texture color and the NdotV value for basic diffuse lighting
     float4 FinalColor = Albedo * NdotV;
