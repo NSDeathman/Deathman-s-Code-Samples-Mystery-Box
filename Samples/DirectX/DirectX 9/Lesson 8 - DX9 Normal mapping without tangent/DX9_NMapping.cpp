@@ -192,7 +192,7 @@ void CompileShaders()
                                         nullptr,                        // No include handler needed
                                         "VSMain",                       // Entry point for the vertex shader
                                         "vs_3_0",                       // Shader model (version)
-                                        D3DXSHADER_OPTIMIZATION_LEVEL3,                           // No flags specified
+                                        D3DXSHADER_OPTIMIZATION_LEVEL3,
                                         &VertexShaderBuffer,            // Output buffer for compiled shader
                                         &ErrorBuffer,                   // Output buffer for any errors
                                         &g_VertexShaderConstantTable ); // Constant table for the vertex shader
@@ -228,7 +228,7 @@ void CompileShaders()
                                         nullptr,                        // No include handler needed
                                         "PSMain",                       // Entry point for the pixel shader
                                         "ps_3_0",                       // Shader model (version)
-                                        D3DXSHADER_OPTIMIZATION_LEVEL3,                           // No flags specified
+                                        D3DXSHADER_OPTIMIZATION_LEVEL3,
                                         &PixelShaderBuffer,             // Output buffer for compiled shader
                                         &ErrorBuffer,                   // Output buffer for any errors
                                         &g_PixelShaderConstantTable );  // Constant table for the pixel shader

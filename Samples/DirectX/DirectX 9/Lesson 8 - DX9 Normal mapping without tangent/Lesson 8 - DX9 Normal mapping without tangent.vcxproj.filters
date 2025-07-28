@@ -19,12 +19,6 @@
     <ClInclude Include="MeshLoader.h">
       <Filter>Model loader</Filter>
     </ClInclude>
-    <ClInclude Include="normal_map_functions.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

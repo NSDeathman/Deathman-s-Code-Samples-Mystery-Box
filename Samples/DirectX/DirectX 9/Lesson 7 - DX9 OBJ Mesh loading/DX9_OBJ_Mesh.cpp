@@ -382,9 +382,9 @@ void DrawGeometry()
             g_Direct3DDevice->SetTexture(0, pMaterial->pTextureAlbedo);
 
             // Set texture sampler states to control texture filtering behavior.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); // Use anisotropic filtering for magnification.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); // Use linear filtering for minification.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); // Use linear filtering for mipmap levels.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);   // Use anisotropic filtering for magnification.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);   // Use linear filtering for minification.
+            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);        // Use linear filtering for mipmap levels.
 
             // Set the maximum level of anisotropy for texture sampling.
             g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
