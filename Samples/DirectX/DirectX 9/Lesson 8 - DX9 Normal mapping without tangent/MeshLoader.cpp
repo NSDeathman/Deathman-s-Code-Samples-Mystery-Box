@@ -68,64 +68,64 @@ void CMeshLoader::Destroy()
 //--------------------------------------------------------------------------------------
 HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePath, const CHAR* strFilename)
 {
-	Print("\n"); // Print a new line for clarity in output log.
-	Print("Creating mesh from OBJ file with name: %s", strFilename); // Log the filename being processed.
+    Print("\n"); // Print a new line for clarity in output log.
+    Print("Creating mesh from OBJ file with name: %s", strFilename); // Log the filename being processed.
 
-	HRESULT hr; // Declare a variable to store HRESULT return codes.
-	CHAR str[MAX_PATH] = { 0 }; // Buffer for path strings, initialized to zero.
+    HRESULT hr; // Declare a variable to store HRESULT return codes for error handling.
+    CHAR str[MAX_PATH] = { 0 }; // Buffer for path strings, initialized to zero.
 
-	// Start clean by destroying any previously loaded mesh or resources.
-	Destroy();
+    // Start clean by destroying any previously loaded mesh or resources, ensuring no memory leaks occur.
+    Destroy();
 
-	// Store the device pointer for later use. This is essential for rendering.
-	m_pd3dDevice = pd3dDevice;
+    // Store the device pointer for later use. This is essential for rendering operations.
+    m_pd3dDevice = pd3dDevice;
 
-	// Load the vertex buffer, index buffer, and subset information from the specified OBJ file.
-	Print("Reading mesh data from file");
-	hr = LoadGeometryFromOBJ(strFilePath, strFilename); // Call the function to load mesh geometry.
+    // Load vertex buffer, index buffer, and subset information from the specified OBJ file.
+    Print("Reading mesh data from file");
+    hr = LoadGeometryFromOBJ(strFilePath, strFilename); // Call the function to load mesh geometry.
 
-	// Check if loading geometry was successful; assert and log error if failed.
-	ASSERT(SUCCEEDED(hr), "Can't load geometry from OBJ: %s", strFilePath + strFilename);
+    // Check if loading geometry was successful; assert and log an error if failed.
+    ASSERT(SUCCEEDED(hr), "Can't load geometry from OBJ: %s", strFilePath + strFilename);
 
-	// Save the current directory to restore it later.
-	CHAR strOldDir[MAX_PATH] = { 0 };
-	GetCurrentDirectory(MAX_PATH, strOldDir); // Retrieve the current working directory.
-	SetCurrentDirectory(m_strMediaDir); // Change the current directory to where media files are located.
+    // Save the current directory to restore it later after texture loading.
+    CHAR strOldDir[MAX_PATH] = { 0 };
+    GetCurrentDirectory(MAX_PATH, strOldDir); // Retrieve the current working directory.
+    SetCurrentDirectory(m_strMediaDir); // Change the current directory to where media files are located.
 
-	// Load material textures associated with the mesh.
-	Print("Loading material textures");
-	for (int iMaterial = 0; iMaterial < m_Materials.GetSize(); iMaterial++) // Loop through each material.
-	{
-		Material* pMaterial = m_Materials.GetAt(iMaterial); // Get the current material.
-		if (pMaterial->strTextureAlbedo[0]) // Check if there is an albedo texture defined.
-		{
-			// Avoid loading the same texture twice by checking previously loaded materials.
-			bool bFound = false;
-			for (int x = 0; x < iMaterial; x++)
-			{
-				Material* pCur = m_Materials.GetAt(x); // Compare with earlier materials.
-				if (0 == strcmp(pCur->strTextureAlbedo, pMaterial->strTextureAlbedo)) // If found, reuse the texture.
-				{
-					bFound = true; // Mark as found.
-					pMaterial->pTextureAlbedo = pCur->pTextureAlbedo; // Assign existing texture
-					break; // No need to continue searching.
-				}
-			}
+    // Load material textures associated with the mesh.
+    Print("Loading material textures");
+    for (int iMaterial = 0; iMaterial < m_Materials.GetSize(); iMaterial++) // Loop through each material.
+    {
+        Material* pMaterial = m_Materials.GetAt(iMaterial); // Get the current material structure.
+        if (pMaterial->strTextureAlbedo[0]) // Check if there is an albedo texture defined.
+        {
+            // Avoid loading the same texture twice by checking previously loaded materials.
+            bool bFound = false;
+            for (int x = 0; x < iMaterial; x++)
+            {
+                Material* pCur = m_Materials.GetAt(x); // Compare with earlier materials.
+                if (0 == strcmp(pCur->strTextureAlbedo, pMaterial->strTextureAlbedo)) // If found, reuse the texture.
+                {
+                    bFound = true; // Mark as found.
+                    pMaterial->pTextureAlbedo = pCur->pTextureAlbedo; // Assign existing texture pointer.
+                    break; // No need to continue searching.
+                }
+            }
 
-			// If texture not found, load it from file.
-			if (!bFound)
-			{
-				Print("Loading albedo texture: %s", pMaterial->strTextureAlbedo); // Log texture loading.
-				hr = D3DXCreateTextureFromFile(pd3dDevice, pMaterial->strTextureAlbedo, &(pMaterial->pTextureAlbedo)); // Load texture.
-				ASSERT(SUCCEEDED(hr), "Can't load texture from OBJ: %s", pMaterial->strTextureAlbedo); // Check for success and assert if failed.
-			}
-		}
-	}
+            // If texture not found, load it from file.
+            if (!bFound)
+            {
+                Print("Loading albedo texture: %s", pMaterial->strTextureAlbedo); // Log texture loading.
+                hr = D3DXCreateTextureFromFile(pd3dDevice, pMaterial->strTextureAlbedo, &(pMaterial->pTextureAlbedo)); // Load texture into Direct3D.
+                ASSERT(SUCCEEDED(hr), "Can't load texture from OBJ: %s", pMaterial->strTextureAlbedo); // Check for success and assert if failed.
+            }
+        }
+    }
 
-	// Restore the original current directory after loading textures.
-	SetCurrentDirectory(strOldDir);
+    // Restore the original current directory after loading textures to avoid side effects on other file operations.
+    SetCurrentDirectory(strOldDir);
 
-	Print("Creating mesh from readed data");
+    Print("Creating mesh from readed data");
 
 	// Create the encapsulated mesh object using D3DX.
 	ID3DXMesh* pMesh = NULL; // Pointer for the mesh, initialized to NULL.
@@ -163,6 +163,10 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 	pMesh->UnlockAttributeBuffer(); // Unlock the attribute buffer after copying.
 	m_Attributes.RemoveAll(); // Clear the original attribute data array to free up resources.
 
+	Print("Raw mesh created");
+
+	Print("Create adjacency for mesh");
+
 	// Reorder the vertices according to subset and optimize the mesh for the graphics card's vertex cache.
 	// This improves performance by allowing efficient access to vertex data during rendering.
 	DWORD* aAdjacency = new DWORD[pMesh->GetNumFaces() * 3L]; // Allocate an array to store adjacency information for the faces.
@@ -173,41 +177,51 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 
 	ASSERT(SUCCEEDED(hr), "Can't Generate Adjacency in create mesh from OBJ: %s", strFilePath + strFilename); // Assert to check for success of adjacency generation.
 
+	Print("Optimize mesh");
+
 	hr = pMesh->OptimizeInplace(D3DXMESHOPT_ATTRSORT | D3DXMESHOPT_VERTEXCACHE, aAdjacency, NULL, NULL, NULL); // Optimize the mesh in-place for better rendering performance.
 
 	ASSERT(SUCCEEDED(hr), "Can't Optimize Inplace in create mesh from OBJ: %s", strFilePath + strFilename); // Assert to check for successful optimization.
 
-	m_pMesh = pMesh; // Assign the newly created mesh to the class member variable for later use.
-
-	//D3DXComputeTangentFrameEx(pMesh, D3DDECLUSAGE_TEXCOORD, 0, D3DDECLUSAGE_BINORMAL, 0, D3DDECLUSAGE_TANGENT, 0, D3DDECLUSAGE_NORMAL, 0, 0, 0, 0.01f, 0.25f, 0.01f, &m_pMesh, 0);
-	
-	D3DXComputeTangentFrameEx(pMesh, 
-							  D3DDECLUSAGE_TEXCOORD, 
-							  0,
-							  D3DX_DEFAULT,
-							  0, 
-							  D3DDECLUSAGE_TANGENT, 
-							  0,
-							  D3DDECLUSAGE_NORMAL, 
-							  0,
-							  D3DXTANGENT_CALCULATE_NORMALS,
-							  NULL, 
-							  0.01f, 
-							  0.25f, 
-							  0.01f, 
-							  &m_pMesh, 
-							  NULL);
-
-	Print("Mesh successfully created!");
-	Print("Mesh statistic:");
-	Print("Vertices count: %d", m_pMesh->GetNumVertices());
-	Print("Faces count: %d", m_pMesh->GetNumFaces());
-	Print("Materials count: %d", m_Materials.GetSize());
-	Print("\n");
-
 	SAFE_DELETE_ARRAY(aAdjacency); // Clean up the adjacency array to prevent memory leaks.
 
-	return S_OK;
+	Print("Create tangents for mesh"); // Log that the tangent generation process for the mesh is starting.
+
+	// Calculate tangent vectors for the mesh. Tangents are essential for proper normal mapping in shader programs.
+	// The parameters below define how the tangents will be computed.
+	// - D3DDECLUSAGE_TEXCOORD and 0: Specify the texture coordinate stream to use.
+	// - D3DX_DEFAULT: Use default settings for tangent computation.
+	// - D3DDECLUSAGE_TANGENT and 0: Define where to store the computed tangents in the vertex buffer.
+	// - D3DDECLUSAGE_NORMAL and 0: Specify the normal stream to use for tangent computation.
+	// - D3DXTANGENT_CALCULATE_NORMALS: Indicates that normals should be recalculated if they are not available.
+	// - NULL: Placeholder for additional output parameters.
+	// - 0.01f, 0.25f, 0.01f: Parameters influencing the tangent computation behavior (e.g., precision).
+	D3DXComputeTangentFrameEx(	pMesh,
+								D3DDECLUSAGE_TEXCOORD,
+								0,
+								D3DX_DEFAULT,
+								0,
+								D3DDECLUSAGE_TANGENT,
+								0,
+								D3DDECLUSAGE_NORMAL,
+								0,
+								D3DXTANGENT_CALCULATE_NORMALS,
+								NULL,
+								0.01f,
+								0.25f,
+								0.01f,
+								&m_pMesh,
+								NULL );
+
+	Print("Mesh successfully created!"); // Log that the mesh creation process has completed successfully.
+
+	Print("Mesh statistic:"); // Log header for mesh statistics output.
+	Print("Vertices count: %d", m_pMesh->GetNumVertices()); // Output the number of vertices in the mesh.
+	Print("Faces count: %d", m_pMesh->GetNumFaces()); // Output the number of faces (triangles) in the mesh.
+	Print("Materials count: %d", m_Materials.GetSize()); // Output the number of materials associated with the mesh.
+	Print("\n"); // Print a newline for better readability in the output logs.
+
+	return S_OK; // Return success status to indicate that the mesh creation operation completed without errors.
 }
 
 //--------------------------------------------------------------------------------------
