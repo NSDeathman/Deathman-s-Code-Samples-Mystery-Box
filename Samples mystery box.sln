@@ -33,7 +33,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 6 - DX9 Shaders", "S
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 7 - DX9 OBJ Mesh loading", "Samples\DirectX\DirectX 9\Lesson 7 - DX9 OBJ Mesh loading\Lesson 7 - DX9 OBJ Mesh loading.vcxproj", "{801D0A37-D33A-4BC0-B89D-E1F9C155A4B3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 8 - DX9 Normal mapping", "Samples\DirectX\DirectX 9\Lesson 8 - DX9 Normal mapping\Lesson 8 - DX9 Normal mapping.vcxproj", "{64769F06-6484-410B-A2FD-7855361F3B88}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lesson 8 - DX9 Normal mapping and Parallax", "Samples\DirectX\DirectX 9\Lesson 8 - DX9 Normal mapping and Parallax\Lesson 8 - DX9 Normal mapping and Parallax.vcxproj", "{64769F06-6484-410B-A2FD-7855361F3B88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
