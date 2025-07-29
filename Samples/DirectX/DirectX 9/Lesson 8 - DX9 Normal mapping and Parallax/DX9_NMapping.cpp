@@ -373,6 +373,17 @@ void UpdateTransformMatrices()
     g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorldViewProjection", &matWorldViewProjection);
 }
 ///////////////////////////////////////////////////////////////
+void SetTextureFiltration(DWORD Stage)
+{
+    // Set texture sampler states to control texture filtering behavior.
+    g_Direct3DDevice->SetSamplerState(Stage, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); // Use anisotropic filtering for magnification.
+    g_Direct3DDevice->SetSamplerState(Stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); // Use linear filtering for minification.
+    g_Direct3DDevice->SetSamplerState(Stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); // Use linear filtering for mipmap levels.
+
+    // Set the maximum level of anisotropy for texture sampling.
+    g_Direct3DDevice->SetSamplerState(Stage, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
+}
+///////////////////////////////////////////////////////////////
 void DrawGeometry()
 {
     // Enable backface culling to prevent rendering of faces that are facing away from the camera.
@@ -401,35 +412,20 @@ void DrawGeometry()
             // This allows the pixel shader to access and use this texture when rendering the geometry.
             g_Direct3DDevice->SetTexture(0, pMaterial->pTextureAlbedo); // Bind the albedo texture to register s0.
 
-            // Set texture sampler states to control texture filtering behavior.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); // Use anisotropic filtering for magnification.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); // Use linear filtering for minification.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); // Use linear filtering for mipmap levels.
-
-            // Set the maximum level of anisotropy for texture sampling.
-            g_Direct3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
+            // Setup filtration types for texture, binded to s0 register
+            SetTextureFiltration(0);
 
             // Setup our bump texture. Bind the texture resource to the shader's texture register (S1).
             g_Direct3DDevice->SetTexture(1, pMaterial->pTextureBump); // Bind the bump texture to register s1.
 
-            // Set texture sampler states to control texture filtering behavior.
-            g_Direct3DDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); // Use anisotropic filtering for magnification.
-            g_Direct3DDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); // Use linear filtering for minification.
-            g_Direct3DDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); // Use linear filtering for mipmap levels.
-
-            // Set the maximum level of anisotropy for texture sampling.
-            g_Direct3DDevice->SetSamplerState(1, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
+            // Setup filtration types for texture, binded to s1 register
+            SetTextureFiltration(1);
 
             // Setup our height texture. Bind the texture resource to the shader's texture register (S2).
             g_Direct3DDevice->SetTexture(2, pMaterial->pTextureHeight); // Bind the bump texture to register s2.
 
-            // Set texture sampler states to control texture filtering behavior.
-            g_Direct3DDevice->SetSamplerState(2, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); // Use anisotropic filtering for magnification.
-            g_Direct3DDevice->SetSamplerState(2, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); // Use linear filtering for minification.
-            g_Direct3DDevice->SetSamplerState(2, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); // Use linear filtering for mipmap levels.
-
-            // Set the maximum level of anisotropy for texture sampling.
-            g_Direct3DDevice->SetSamplerState(2, D3DSAMP_MAXANISOTROPY, 16); // Max anisotropy level set to 16.
+            // Setup filtration types for texture, binded to s2 register
+            SetTextureFiltration(2);
 
             // Draw the current subset of the mesh using the appropriate material and textures.
             pMesh->DrawSubset(iSubset);
