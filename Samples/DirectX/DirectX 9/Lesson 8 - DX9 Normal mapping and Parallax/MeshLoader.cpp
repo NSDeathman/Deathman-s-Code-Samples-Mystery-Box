@@ -211,7 +211,7 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 	// - D3DX_DEFAULT: Use default settings for tangent computation.
 	// - D3DDECLUSAGE_TANGENT and 0: Define where to store the computed tangents in the vertex buffer.
 	// - D3DDECLUSAGE_NORMAL and 0: Specify the normal stream to use for tangent computation.
-	// - D3DXTANGENT_CALCULATE_NORMALS: Indicates that normals should be recalculated if they are not available.
+	// - NULL
 	// - NULL: Placeholder for additional output parameters.
 	// - 0.01f, 0.25f, 0.01f: Parameters influencing the tangent computation behavior (e.g., precision).
 	D3DXComputeTangentFrameEx(	pMesh,
@@ -223,7 +223,7 @@ HRESULT CMeshLoader::Create(IDirect3DDevice9* pd3dDevice, const CHAR* strFilePat
 								0,
 								D3DDECLUSAGE_NORMAL,
 								0,
-								D3DXTANGENT_CALCULATE_NORMALS,
+								NULL,
 								NULL,
 								0.01f,
 								0.25f,

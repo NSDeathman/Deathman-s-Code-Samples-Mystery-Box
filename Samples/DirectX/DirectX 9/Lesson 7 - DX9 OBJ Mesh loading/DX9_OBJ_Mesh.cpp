@@ -359,7 +359,7 @@ void DrawGeometry()
 {
     // Enable backface culling to prevent rendering of faces that are facing away from the camera,
     // improving performance by reducing the number of triangles processed.
-    g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW); // Counter-clockwise face culling
+    g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE); // Counter-clockwise face culling
 
     // Set the vertex shader to be used for processing vertex data.
     // The vertex shader will transform vertices and perform any necessary manipulations before rasterization.

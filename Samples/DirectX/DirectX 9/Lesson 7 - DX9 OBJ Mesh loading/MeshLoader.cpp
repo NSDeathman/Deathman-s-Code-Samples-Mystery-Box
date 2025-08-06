@@ -228,7 +228,7 @@ HRESULT CMeshLoader::LoadGeometryFromOBJ(const CHAR* strFilepath, const CHAR* st
 			// Vertex Position
 			float x, y, z;
 			InFile >> x >> y >> z;
-			Positions.Add(D3DXVECTOR3(-x, y, z));
+			Positions.Add(D3DXVECTOR3(x, y, z));
 		}
 		else if (0 == strcmp(strCommand, "vt"))
 		{

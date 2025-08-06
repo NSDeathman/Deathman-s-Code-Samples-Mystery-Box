@@ -1,0 +1,51 @@
+///////////////////////////////////////////////////////////////
+// Matrix uniforms for transformation and projection
+uniform float4x4 matWorld;                  // World matrix: transforms object space to world space
+///////////////////////////////////////////////////////////////
+// Texture sampler for the albedo (color) texture
+uniform sampler2D smpAlbedo : register(s0); // Sampler for accessing the albedo texture, bound to register s0
+///////////////////////////////////////////////////////////////
+// Input structure for vertex shader
+struct VertexInput
+{
+    float3 Position : POSITION; // Vertex position in object space
+    float2 UV : TEXCOORD0;      // Texture coordinates for sampling the texture
+};
+
+// Output structure for interpolated data sent to the pixel shader
+struct Interpolators
+{
+    float4 HomogeniousPosition : POSITION; // Transformed position in homogeneous coordinates for rasterization
+    float2 UV : TEXCOORD2;                 // Texture coordinates passed to the pixel shader
+};
+///////////////////////////////////////////////////////////////
+// Vertex shader main function
+///////////////////////////////////////////////////////////////
+// Vertex shader main function
+Interpolators VSMain(VertexInput Input)
+{
+    Interpolators Output; // Create an instance of the output structure to hold interpolated data for the pixel shader.
+
+    // Transform the vertex position by the combined World, View, and Projection matrix.
+    // This transforms the vertex from object space into clip space where it can be rendered.
+    Output.HomogeniousPosition = mul(float4(Input.Position, 1.0f), matWorld);
+
+    // Pass through the UV coordinates directly from the input.
+    Output.UV = Input.UV;
+
+    // Get UV from vertex position
+    //Output.UV = Input.Position.xy * 0.5f + 0.5f;
+
+    return Output; // Return the interpolated data for use in the pixel shader.
+}
+
+// Pixel shader main function
+float4 PSMain(Interpolators Input) : COLOR0
+{
+    float4 OutputColor = 0.0f;
+
+    OutputColor.xy = Input.UV.xy;
+
+    return OutputColor;
+}
+///////////////////////////////////////////////////////////////

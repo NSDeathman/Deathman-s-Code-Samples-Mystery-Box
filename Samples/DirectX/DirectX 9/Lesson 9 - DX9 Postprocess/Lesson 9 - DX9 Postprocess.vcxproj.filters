@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="DXUT_timer.cpp">
+      <Filter>Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshLoader.cpp">
+      <Filter>Model loader</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9_Postprocess.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="DXUT_timer.h">
+      <Filter>Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="growable_array.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshLoader.h">
+      <Filter>Model loader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6914dcf2-8119-4949-9df3-42eaa94cc762}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Timer">
+      <UniqueIdentifier>{100954c7-eefb-48c3-886d-8f6c193f0263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{5eba6389-3ffd-4110-95e1-f81473adb3e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model loader">
+      <UniqueIdentifier>{0abc1038-9211-4ab2-8f18-8146b682c963}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="object_shader.txt">
+      <Filter>Shaders</Filter>
+    </Text>
+    <Text Include="screen_shader.txt">
+      <Filter>Shaders</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

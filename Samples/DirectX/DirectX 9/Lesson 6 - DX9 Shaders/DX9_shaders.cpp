@@ -57,7 +57,6 @@ struct VERTEX_DATA
 {
     D3DXVECTOR3 Position;
     D3DXVECTOR3 Normal;
-    D3DCOLOR Color;
     D3DXVECTOR2 UV;
 };
 
@@ -67,12 +66,9 @@ D3DVERTEXELEMENT9 Declaration[] =
 {
     { 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
     { 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
-    { 0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
-    { 0, 36, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+    { 0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
     D3DDECL_END()
 };
-
-#define VERTEXFVF (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1) 
 ///////////////////////////////////////////////////////////////
 // Cube attrubutes
 #define CUBE_VERTEX_COUNT 24
@@ -405,9 +401,6 @@ void CompileShaders()
 ///////////////////////////////////////////////////////////////
 void CreateGeometry()
 {
-    // Create a vertex declaration which describes the vertex format used in the vertex buffer
-    g_Direct3DDevice->CreateVertexDeclaration(Declaration, &g_VertexDeclaration);
-
     // Log creation of the vertex buffer
     std::cout << "\n";
     std::cout << "Creating vertex buffer \n";
@@ -421,7 +414,7 @@ void CreateGeometry()
     // Create the vertex buffer in managed memory pool with specified parameters
     g_Direct3DDevice->CreateVertexBuffer( VertexBufferSize, // Size of the vertex buffer
                                           NULL,             // Usage flag (default)
-                                          VERTEXFVF,        // Flexible Vertex Format (defines the layout of the vertex data)
+                                          NULL,             // Flexible Vertex Format (defines the layout of the vertex data)
                                           D3DPOOL_MANAGED,  // Memory pool type (managed by Direct3D)
                                           &g_VertexBuffer,  // Pointer to the created vertex buffer
                                           NULL );           // Handle to the resource (not needed here)
@@ -460,7 +453,6 @@ void CreateGeometry()
 
         // Assign position, color, normal, and UV mapping to the current vertex
         VerticesData[total_vertices_iterator].Position = CubeVerticesPositions[total_vertices_iterator];
-        VerticesData[total_vertices_iterator].Color = { D3DCOLOR_XRGB(255, 255, 255) }; // Set color to white
         VerticesData[total_vertices_iterator].Normal = CubeSidesNormals[side_id]; // Get the normal for the current side
         VerticesData[total_vertices_iterator].UV = CubeSideUV[side_vertices_iterator]; // Assign UV coordinates
     }
@@ -471,6 +463,9 @@ void CreateGeometry()
 
     // Check if unlocking was successful; if not, assert and show an error message
     Assert(FAILED(result), "Error in vertex buffer unlocking procedure");
+
+    // Create a vertex declaration which describes the vertex format used in the vertex buffer
+    g_Direct3DDevice->CreateVertexDeclaration(Declaration, &g_VertexDeclaration);
 
     // Create and fill index buffer
     std::cout << "\n";
@@ -639,9 +634,7 @@ void DrawGeometry()
     // This allows indexed drawing, which is more efficient than drawing each vertex individually.
     g_Direct3DDevice->SetIndices(g_IndexBuffer);
 
-    // Specify the Flexible Vertex Format (FVF) to inform the graphics pipeline about vertex structure/layout.
-    // This format includes information such as position, color, normal, and texture coordinates of each vertex.
-    g_Direct3DDevice->SetFVF(VERTEXFVF);
+    g_Direct3DDevice->SetVertexDeclaration(g_VertexDeclaration);
 
     // Set the vertex shader to be used for processing vertex data.
     // The vertex shader will transform vertices and perform any necessary manipulations before rasterization.
