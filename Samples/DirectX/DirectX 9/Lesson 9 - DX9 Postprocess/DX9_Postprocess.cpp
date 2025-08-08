@@ -22,6 +22,9 @@ IDirect3DPixelShader9* g_ScreenPixelShader;
 
 ID3DXConstantTable* g_VertexShaderConstantTable;
 ID3DXConstantTable* g_PixelShaderConstantTable;
+
+ID3DXConstantTable* g_ScreenVertexShaderConstantTable;
+ID3DXConstantTable* g_ScreenPixelShaderConstantTable;
 ///////////////////////////////////////////////////////////////
 bool g_bNeedReset = false;
 bool g_bNeedCloseApplication = false;
@@ -267,7 +270,7 @@ void CompileShaders()
                                         D3DXSHADER_OPTIMIZATION_LEVEL3,
                                         &ScreenVertexShaderBuffer,      // Output buffer for compiled shader
                                         &ErrorBuffer,                   // Output buffer for any errors
-                                        &g_VertexShaderConstantTable ); // Constant table for the vertex shader
+                                        &g_ScreenVertexShaderConstantTable ); // Constant table for the vertex shader
 
     PrintErrorBuffer(ErrorBuffer);
 
@@ -289,7 +292,7 @@ void CompileShaders()
                                         D3DXSHADER_OPTIMIZATION_LEVEL3,
                                         &ScreenPixelShaderBuffer,       // Output buffer for compiled shader
                                         &ErrorBuffer,                   // Output buffer for any errors
-                                        &g_PixelShaderConstantTable );  // Constant table for the pixel shader
+                                        &g_ScreenPixelShaderConstantTable );  // Constant table for the pixel shader
 
     PrintErrorBuffer(ErrorBuffer);
 
@@ -310,16 +313,53 @@ void HandleDeviceLost()
         g_bNeedReset = true;
 }
 ///////////////////////////////////////////////////////////////
+LPDIRECT3DTEXTURE9 g_pFullScreenTexture = NULL;
 
+LPDIRECT3DSURFACE9 g_pFullScreenTextureSurf = NULL;
+
+LPD3DXRENDERTOSURFACE g_pRenderToSurface = NULL;
+
+D3DVIEWPORT9 g_ViewportFB;
+D3DVIEWPORT9 g_ViewportOffscreen;
 ///////////////////////////////////////////////////////////////
 void CreateRenderTargetTextures()
 {
+    g_Direct3DDevice->GetViewport( &g_ViewportFB );
 
+    // Backbuffer viewport is identical to frontbuffer, except starting at 0, 0
+    //g_ViewportOffscreen = g_ViewportFB;
+    //g_ViewportOffscreen.X = 0;
+    //g_ViewportOffscreen.Y = 0;
+    //g_ViewportOffscreen.Width = g_ScreenWidth;
+    //g_ViewportOffscreen.Height = g_ScreenHeight;
+
+    HRESULT result = E_FAIL;
+
+    // Create fullscreen renders target texture
+    result = D3DXCreateTexture( g_Direct3DDevice, 
+                                g_ScreenWidth,
+                                g_ScreenHeight,
+                                1, 
+                                NULL, 
+                                D3DFMT_X8R8G8B8, 
+                                D3DPOOL_DEFAULT, 
+                                &g_pFullScreenTexture );
+
+    ASSERT(SUCCEEDED(result), "Can't create rendertarget texture");
+
+    g_pFullScreenTexture->GetSurfaceLevel(0, &g_pFullScreenTextureSurf);
+
+    //D3DSURFACE_DESC desc;
+    //g_pFullScreenTextureSurf->GetDesc(&desc);
 }
 
 void RecreateRenderTargetTextures()
 {
+    //SAFE_RELEASE(g_pFullScreenTexture);
+    //SAFE_RELEASE(g_pFullScreenTextureSurf);
+    //SAFE_RELEASE(g_pRenderToSurface);
 
+    //CreateRenderTargetTextures();
 }
 ///////////////////////////////////////////////////////////////
 void ResetDirect3D()
@@ -370,7 +410,7 @@ void UpdateTransformMatrices()
     D3DXMATRIX matWorld;
 
     float iTime = (float)g_Timer.GetTime();
-    FLOAT fAngle = iTime * (2.0f * D3DX_PI) / 20.0f;
+    FLOAT fAngle = iTime * D3DX_PI / 10.0f;
     D3DXMatrixRotationY(&matWorld, fAngle);
     g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorld", &matWorld);
 
@@ -445,7 +485,8 @@ void SetTextureFiltration(DWORD Stage, DWORD MagFilter, DWORD Minfilter, DWORD M
 ///////////////////////////////////////////////////////////////
 void DrawGeometry()
 {
-    //g_Direct3DDevice->SetRenderTarget(0, RenderTargetSurface);
+    //g_Direct3DDevice->SetRenderTarget(0, g_pFullScreenTextureSurf);
+    //g_Direct3DDevice->SetViewport(&g_ViewportFB);
 
     g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE); // Set culling mode to none (i.e., render all faces).
 
@@ -546,13 +587,15 @@ void DrawScreenQuad()
 {
     D3DXMATRIX matWorld;
     D3DXMatrixTranslation(&matWorld, 0, 0, 0);
-    g_VertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorld", &matWorld);
+    g_ScreenVertexShaderConstantTable->SetMatrix(g_Direct3DDevice, "matWorld", &matWorld);
 
     g_Direct3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
     g_Direct3DDevice->SetVertexShader(g_ScreenVertexShader);
 
     g_Direct3DDevice->SetPixelShader(g_ScreenPixelShader);
+
+    g_Direct3DDevice->SetTexture(0, g_pFullScreenTexture);
 
     g_Direct3DDevice->SetVertexDeclaration(g_VertexDeclaration);
 
@@ -618,7 +661,7 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
         UpdateTransformMatrices();
 
         // Clear the back buffer
-        g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(255, 255, 255), 1.0f, NULL);
+        g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, NULL);
 
         // Begin the scene
         g_Direct3DDevice->BeginScene();
@@ -627,17 +670,27 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
 
         SetPixelShaderConstants();
 
+        //g_Direct3DDevice->SetViewport(&g_ViewportFB);
+
+        g_pFullScreenTexture->GetSurfaceLevel(0, &g_pFullScreenTextureSurf);
+        g_Direct3DDevice->SetRenderTarget(0, g_pFullScreenTextureSurf);
+        g_Direct3DDevice->Clear(NULL, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 0, 0), 1.0f, NULL);
+
         // Draw our indexed cube primitive and set textures and render states
-        DrawGeometry();
+        //DrawGeometry();
 
-        g_Direct3DDevice->EndScene();
+        //g_Direct3DDevice->EndScene();
 
-        g_Direct3DDevice->BeginScene();
+        //g_Direct3DDevice->BeginScene();
 
-        DrawScreenQuad();
+        //g_Direct3DDevice->SetRenderTarget(0, NULL);
+
+        //DrawScreenQuad();
 
         // End the scene
         g_Direct3DDevice->EndScene();
+
+        g_Direct3DDevice->SetRenderTarget(0, NULL);
 
         // Result value for handle function execution result
         HRESULT result = E_FAIL;
@@ -667,6 +720,8 @@ INT WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, INT)
             g_bNeedReset = false;
         }
     }
+
+    D3DXSaveSurfaceToFile("image.png", D3DXIFF_PNG, g_pFullScreenTextureSurf, NULL, NULL);
 
     //-------------------DESTROYING CODE-------------------//
     Print("\n");

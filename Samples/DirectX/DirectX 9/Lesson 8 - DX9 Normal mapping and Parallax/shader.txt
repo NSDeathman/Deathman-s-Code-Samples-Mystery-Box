@@ -235,7 +235,7 @@ float4 PSMain(Interpolators Input) : COLOR0
     float3 NormalMap = tex2D(smpBump, UV).xyz;
 
     // Remap values from [0;1] space to [-1;1] space
-    NormalMap = NormalMap * 2.0f + 1.0f;
+    NormalMap = NormalMap * 2.0f - 1.0f;
 
     // Create bumpy normal by applying the normal map derived from height to get more detailed lighting.
     float3 Normal = mul(TBN, NormalMap);
